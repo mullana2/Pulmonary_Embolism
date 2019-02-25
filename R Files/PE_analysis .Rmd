@@ -1,0 +1,201 @@
+---
+title: "PE_analysis"
+author: "Aidan Mullan
+date: "2/7/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+## Reading in data
+PE <- read.csv("PE_clean.csv")
+PE_noNA <- na.omit(PE)
+
+PE$Contrast.Given <- as.numeric(PE$Contrast.Given)
+```
+
+```{r}
+#####-----------------
+## Summ Stats for Effective Dose and Contrast
+#####-----------------
+
+summary(PE$Eff.Dose)
+summary(PE$Contrast.Given)
+
+## Looking at Contrast alone: Histogram and Boxplot
+par(mfrow = c(1,2))
+hist(PE$Contrast.Given, breaks = 20, main = "Figure 2a: Histogram of Contrast Given",
+     xlab = "Contrast Given", ylab = "No. Patients", cex.main = 0.75)
+boxplot(PE$Contrast.Given, main = "Figure 2b: Boxplot of Contrast Given", cex.main = 0.75, 
+        ylab = "Contrast Given")
+axis(side = 2, at = seq(0,100,10))
+par(mfrow = c(1,1))
+summary(PE$Contrast.Given)
+
+## Looking at Effective Dose Alone: Histogram and Boxplot
+par(mfrow = c(1,2))
+hist(PE$Eff.Dose, breaks = 20, main = "Figure 1a: Histogram of Effective Dose",
+     xlab = "Effective Dose", ylab = "No. Patients", cex.main = 0.75)
+axis(side = 1, at = seq(0,100,10))
+boxplot(PE$Eff.Dose, main = "Figure 1b: Boxplot of Effective Dose", cex.main = 0.75, 
+        ylab = "Effective Dose")
+axis(side = 2, at = seq(0,100,10))
+par(mfrow = c(1,1))
+
+
+
+## Comparing Age and BMI groups for Eff Dose and Contrast
+table(PE$Age_range, PE$BMI_range)
+
+aggregate(Eff.Dose~Age_range+BMI_range, data = PE, FUN = "mean")
+aggregate(Eff.Dose~Age_range, data = PE, FUN = "mean")
+aggregate(Eff.Dose~BMI_range, data = PE, FUN = "mean")
+
+## Contrast given by age group and BMI group
+aggregate(Contrast.Given~Age_range+BMI_range, data = PE, FUN = "mean")
+aggregate(Contrast.Given~Age_range, data = PE, FUN = "mean")
+aggregate(Contrast.Given~BMI_range, data = PE, FUN = "mean")
+
+## Comparing Scanner Type for Eff Dose and Contrast
+aggregate(Eff.Dose~CT.Type, data = PE, FUN = "mean")
+aggregate(Contrast.Given~CT.Type, data = PE, FUN = "mean")
+aggregate(Eff.Dose~CT.Type, data = PE, FUN = "sd")
+aggregate(Contrast.Given~CT.Type, data = PE, FUN = "sd")
+```
+
+
+
+```{r}
+#####-------------------
+## Summ Stats for Rate of PE
+#####-------------------
+
+PE$PE.Num <- ifelse(PE$Pulmonary.Embolism == "NO", 0, 1)
+mean(PE$PE.Num)
+
+## Positivity by Procedure Type
+aggregate(PE.Num~Procedure, data = PE, FUN = "mean")
+
+## Two-proportion Z test
+p1 <- 0.1093; p2 <- 0.1229; n1 <- 2369; n2 <- 301
+pp <- (p1*n1 + p2*n2) / (n1 + n2)
+z <- (p1-p2)/(sqrt(pp*(1-pp)*(1/n1 + 1/n2)))
+pnorm(z)
+
+## Positivity by Age/BMI
+mean(PE$PE.Num)
+aggregate(PE.Num~Age_range, data = PE, FUN = "mean")
+aggregate(PE.Num~BMI_range, data = PE, FUN = "mean")
+aggregate(PE.Num~Age_range+BMI_range, data = PE, FUN = "mean")
+
+## Positivity by Location
+aggregate(PE.Num~Location, data = PE, FUN = "mean")
+table(PE$Location)
+```
+
+```{r}
+#####-----------------
+## Summ Stats for Patients Testing Positive
+####------------------
+
+PE_Pos <- subset(PE, subset = PE.Num == 1)
+
+## Type by Location
+table(PE_Pos$Type, PE_Pos$Location)
+table(PE_Pos$Type)
+table(PE_Pos$Location)
+
+## Type by Age
+table(PE_Pos$Type, PE_Pos$Age_range)
+table(PE_Pos$Age_range)
+
+## Strain by Location
+table(PE_Pos$Strain, PE_Pos$Location)
+table(PE_Pos$Strain)
+
+## Strain by Age
+table(PE_Pos$Strain, PE_Pos$Age_range)
+```
+
+```{r}
+#####------------------
+## Positivity Model
+#####------------------
+
+positivity1 <- glm(PE.Num~Gender+Age_range+Eff.Dose+BMI_range+Procedure+CT.Type+Location,
+               family = "binomial", data = PE)
+summary(positivity1)
+
+positivity2 <- update(positivity1, .~.-CT.Type)
+summary(positivity2)
+anova(positivity1, positivity2, test = "Chisq")
+
+positivity3 <- update(positivity2, .~.-Age_range)
+anova(positivity2, positivity3, test = "Chisq")
+summary(positivity3)
+
+positivity4 <- update(positivity3, .~.-Procedure)
+anova(positivity3, positivity4, test = "Chisq") 
+summary(positivity4)
+
+positivity5 <- update(positivity4, .~.-Eff.Dose)
+summary(positivity5)
+anova(positivity4, positivity5, test = "Chisq")
+
+positivity6 <- update(positivity5, .~.-Gender)
+anova(positivity5, positivity6, test = "Chisq")
+summary(positivity6)
+
+positivity7 <- update(positivity6, .~.-BMI_range)
+anova(positivity7, positivity6, test = "Chisq")
+summary(positivity7)
+## Final model has only Location
+## Decided to re-model due to "double rule out" not having any positive test results
+```
+
+```{r}
+## Removing double rule out procedure from analysis due to no positive test results
+PE_nodub <- subset(PE, subset = Procedure != "Double rule out")
+pos_nodub1 <- glm(PE.Num~Gender+Age_range+Eff.Dose+BMI_range+Procedure+CT.Type+Location,
+               family = "binomial", data = PE_nodub)
+summary(pos_nodub1)
+
+pos_nodub2 <- update(pos_nodub1, .~.-Procedure-Age_range-Eff.Dose-CT.Type-Gender)
+anova(pos_nodub1, pos_nodub2, test = "Chisq") 
+summary(pos_nodub2)
+## Final model has BMI and Location
+
+```
+
+```{r}
+#####----------------
+## Effective Dose Model
+#####----------------
+
+effdose1 <- lm(log(Eff.Dose)~CT.Type+BMI_range+Age_range+Gender+Location, data = PE)
+summary(effdose1)
+
+effdose2 <- update(effdose1, .~.-Location)
+anova(effdose1, effdose2)
+## Full model is final model
+```
+
+```{r}
+#####----------------
+## Contrast Model
+#####----------------
+
+contrast1 <- lm(Contrast.Given~CT.Type+BMI_range+Age_range+Gender+Location, data = PE)
+summary(contrast1)
+```
+
+
+
+
+
+
+
+

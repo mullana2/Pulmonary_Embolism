@@ -1,0 +1,74 @@
+---
+title: "Data_Cleaning"
+author: "Aidan Mullan"
+date: "2/5/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(readr)
+## Read in the raw data files
+chest <- read_excel("Chest Only.xlsx")
+CTA <- read_excel("CTA.xlsx")
+
+## Remove unnecessary variables (descriptions, repeated columns, etc)
+chest_short <- chest[1:2413,c(1:6,8:9,11:16)]
+CTA_short <- CTA[,c(1:6,8:9,11:16)]
+
+## Combine chest and CTA datasets
+names(CTA_short) <- names(chest_short)
+PE_raw <- rbind(chest_short, CTA_short)
+```
+
+```{r}
+## Collapse factors into main categories for 'Procedure' and 'CT Type'
+pro_index <- which(PE_raw$Procedure %in% c("Triple rule out", NA))
+PE2 <- PE_raw[-pro_index,]
+PE2$Procedure <- ifelse(PE2$Procedure == "Chest only", "Chest Only",
+                        ifelse(PE2$Procedure %in% c("Chest and Abdomen", "Neck and Chest",
+                                                    "Chest, Abdomen and Pelvis"), "CAP", PE2$Procedure))
+
+PE2$`CT Type` <- ifelse(PE2$`CT Type` %in% c("DS_Force", "DS_Drive"), "DS_Scanner", PE2$`CT Type`)
+
+## Give consistency to 'Location', 'Pulmonary Embolism', 'Type', and 'Strain' factor names
+PE2$Location <- ifelse(PE2$Location == "Out", "OUT", 
+                       ifelse(PE2$Location == "In", "IN", PE2$Location))
+
+PE2$`Pulmonary Embolism` <- ifelse(PE2$`Pulmonary Embolism` == "No", "NO", 
+                       ifelse(PE2$`Pulmonary Embolism` == "Yes", "YES", PE2$`Pulmonary Embolism`))
+
+PE2$Type <- ifelse(PE2$Type == "peripheral", "Peripheral", PE2$Type)
+PE2$Type <- ifelse(is.na(PE2$Type), "None", PE2$Type)
+
+PE2$Strain <- ifelse(PE2$Strain %in% c('Yes', 'yes', 'YEs'), "YES",
+                     ifelse(PE2$Strain == "No", "NO", PE2$Strain))
+PE2$Strain <- ifelse(is.na(PE2$Strain), "None", PE2$Strain)
+
+PE2$BMI[c(112,264,416,453,1876,2188,2217,2371,2650)] <- NA
+PE2$BMI <- ifelse(PE2$BMI == "None", NA, PE2$BMI)
+```
+
+```{r}
+## Convert variables to factors with specified levels
+PE2$Gender <- as.factor(PE2$Gender); PE2$Procedure <- as.factor(PE2$Procedure)
+PE2$`CT Type` <- as.factor(PE2$`CT Type`); PE2$Location <- as.factor(PE2$Location)
+PE2$`Pulmonary Embolism` <- as.factor(PE2$`Pulmonary Embolism`)
+PE2$Type <- as.factor(PE2$Type); PE2$Strain <- as.factor(PE2$Strain)
+PE2$BMI <- as.numeric(PE2$BMI); PE2$`Contrast Given` <- as.numeric(PE2$`Contrast Given`)
+
+## Construct age/BMI grouping variables
+PE2$Age_range <- cut(PE2$Age, breaks = c(0,18,35,110), labels = c("<18", "18-35", ">35"))
+PE2$BMI_range <- cut(PE2$BMI, breaks = c(0,25,40,100), labels = c("<25", "25-40", ">40"))
+```
+
+```{r}
+write.csv(PE2, "PE_clean.csv")
+```
+
+
+

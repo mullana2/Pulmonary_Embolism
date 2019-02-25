@@ -1,0 +1,316 @@
+---
+title: "PE Summary Statistics"
+author: "Aidan Mullan"
+date: "2/7/2019"
+header-includes:
+  - \usepackage{float}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.pos = 'htb!')
+```
+
+```{r}
+PE <- read.csv("PE_clean.csv")
+PE$Contrast.Given <- as.numeric(PE$Contrast.Given)
+```
+
+# Summary Statistics
+
+The first two variables we will look at are the Effective Dose of radiation given to patients and the amount of contrast given before the patient's scan. A focus will be placed on how these two measures differ between age groups (under 18, 18-35, older than 35) and BMI groups (under 25, 25-40, above 40).
+
+\textbf{Note:} Any differences or patterns in the data described here are neither definitively significant nor non-significant unless specifically stated. Significance in variable effect will be determined by later regression.
+
+## Effective Radiation Dose and Contrast Given to Patients
+
+Figure 1 shows the distribution of the dose of radiation given to patients during their scan. The average dose administered was 7.23 sieverts. There are a number of patients receiving a substantially higher dose than this average. 522 patients received more than 10 sieverts, 163 received more than 20, and 32 patients received an effective does of more than 40 sieverts. The largest dose received by any patient was 104.73 sieverts.
+
+```{r, echo = FALSE}
+par(mfrow = c(1,2))
+hist(PE$Eff.Dose, breaks = 20, main = "Figure 1a: Histogram of Effective Dose",
+     xlab = "Effective Dose", ylab = "No. Patients", cex.main = 0.75)
+axis(side = 1, at = seq(0,100,10))
+boxplot(PE$Eff.Dose, main = "Figure 1b: Boxplot of Effective Dose", cex.main = 0.75, 
+        ylab = "Effective Dose")
+axis(side = 2, at = seq(0,100,10))
+par(mfrow = c(1,1))
+
+summary(PE$Eff.Dose)
+```
+
+The distribution in the amount of contrast given to patients prior to their CT scan appears to have a pseudo-normal shape centered around 90, as seen in Figure 2. The average amount of contrast used for a patient was 91.32 units, with a minimum of 5 units and a maximum of 186 units. There were 310 patients that received more than 100 units of contrast, while 20 patients received below 50 units.
+
+```{r, echo = FALSE}
+par(mfrow = c(1,2))
+hist(PE$Contrast.Given, breaks = 20, main = "Figure 2a: Histogram of Contrast Given",
+     xlab = "Contrast Given", ylab = "No. Patients", cex.main = 0.75)
+#axis(side = 1, at = seq(0,100,10))
+boxplot(PE$Contrast.Given, main = "Figure 2b: Boxplot of Contrast Given", cex.main = 0.75, 
+        ylab = "Contrast Given")
+axis(side = 2, at = seq(0,200,25))
+par(mfrow = c(1,1))
+summary(PE$Contrast.Given)
+```
+
+#### Comparison with Age and BMI
+
+Both the dose of radiation and the amount of contrast given to a patient rely heavily on the patient's age and body composition. As such, we are interested in observing any differences in effective dose and contrast across these two variables. For our purposes, age has been divided into 3 groups: under 18, between 18 and 35, and older than 35. Similarly, BMI had been divided into 3 groups as well: under 25, between 25 and 40, and above 40. Table 1 shows the breakdown of patients that fall into each subgroup.
+
+
+\begin{table}[H] \centering 
+  \caption{No. of Patients by Age and BMI groups} 
+\begin{tabular}{p{1cm}p{1cm}|p{3cm}p{3cm}p{3cm}|p{2cm}}
+\\[-1.8ex] \hline 
+\hline
+ & & & BMI & \\
+ & & $<$25 & 25-40 & $>$40 \\ 
+\hline \\[-1.8ex] 
+    & $<$18 & 12 (0.4) & 10 (0.3) & 2 (0.1) & 24 (0.9) \\
+AGE & 18-35 & 95 (3.6) & 145 (5.4) & 61 (2.3) & 301 (11.3) \\
+    & $>$35 & 650 (24.3) & 1336 (50.0) & 363 (13.6) & 2349 (87.8) \\
+\hline
+    & & 757 (28.3) & 1491 (55.8) & 426 (15.9) & 2674 (100.0) \\
+\hline 
+\hline \\[-1.8ex]
+\multicolumn{6}{l}{\textit{Note:} Percentage of total patients is given in parentheses}
+ \end{tabular}
+\end{table} 
+
+Here we see that over 87% of all patients examined were over 35 years of age. Moreover, approximately half of all patients examined were both over 35 years of age and above a BMI between  25 and 40. This suggests that just looking at effective dose and contrast without accounting for age and BMI will skew our results toward older, overweight but not obese patients. Tables 2 and 3 give the average effective dose and contrast administered, broken down into these same age and BMI categories.
+
+\begin{table}[H] \centering 
+  \caption{Average Effective Dose by Age and BMI groups} 
+\begin{tabular}{p{1cm}p{1cm}|p{3cm}p{3cm}p{3cm}|p{2cm}}
+\\[-1.8ex] \hline 
+\hline
+ & & & BMI & \\
+ & & $<$25 & 25-40 & $>$40 \\ 
+\hline \\[-1.8ex] 
+    & $<$18 & 1.540 & 4.416 & 10.633 & 3.412 \\
+AGE & 18-35 & 4.008 & 6.086 & 13.983 & 7.002 \\
+    & $>$35 & 4.574 & 7.060 & 13.194 & 7.296 \\
+\hline
+    &       & 4.455 & 6.948 & 13.295 & 7.227 \\
+\hline 
+\hline \\[-1.8ex]
+ \end{tabular}
+\end{table} 
+
+\begin{table}[H] \centering 
+  \caption{Average Contrast Given by Age and BMI groups} 
+\begin{tabular}{p{1cm}p{1cm}|p{3cm}p{3cm}p{3cm}|p{2cm}}
+\\[-1.8ex] \hline 
+\hline
+ & & & BMI & \\
+ & & $<$25 & 25-40 & $>$40 \\ 
+\hline \\[-1.8ex] 
+    & $<$18 & 59.08 & 69.60 & 95.50 & 66.28 \\
+AGE & 18-35 & 84.61 & 89.18 & 102.83 & 90.56 \\
+    & $>$35 & 87.85 & 90.59 & 103.80 & 91.68 \\
+\hline
+    &       & 86.98 & 102.94 & 90.31 & 91.32 \\
+\hline 
+\hline \\[-1.8ex]
+ \end{tabular}
+\end{table} 
+
+From Table 3, it appears that the effective dose of radiation administered increases with age and BMI, and it seems as if BMI has a greater impact on dose than age (This effect will be concretely determined in the later modeling). In Table 4, we see a drastic increase in the amount of contrast used between the under 18 age group and the 18-35 group. There may be a slight increase between this middle group and patients over 35, but the difference appears to be minimal. There does not seem to be any major difference in contrast used across varying BMI groups.
+
+#### Effect of Scanner Type
+
+The various CT scans were performed using one of four different types of CT scanners, each with different output levels of radiation and varying prerequisites that must be met before using a specific scanner. Table 4 shows the average effective dose and contrast given to patients before a scan on each type of scanner. The "DS_Force" and "DS_Drive" scanners were consolodated into a single variable labelled "DS_Scanner".
+
+
+
+\begin{table}[H] \centering 
+  \caption{Average Radiation and Contrast by Scanner Type} 
+\begin{tabular}{p{3cm}|p{3cm}p{3cm}p{3cm}p{3cm}}
+\\[-1.8ex] \hline 
+\hline
+  & 64SSWoIR & 64SSwIR & 128SSwIR & DS Scanner \\ 
+\hline \\[-1.8ex] 
+ Effective Dose & 10.696 (8.63) & 9.305 (10.87) & 7.113 (6.87) & 6.962 (8.43) \\
+ Contrast & 62.41 (43.36) & 67.01 (40.13) & 68.31 (36.48) & 62.72 (33.47)\\
+\hline 
+\hline \\[-1.8ex]
+\multicolumn{5}{l}{\textit{Note:} One standard deviation is given in parentheses}
+ \end{tabular}
+\end{table} 
+
+It appears, from Table 4, that there are not any apparant differences in administered radiation or contrast between the four types of scanners due to the relatively large standard deviations present. However, this is merely the direct effect of scanner type on contrast and radiation dosage. After accounting for other variables during regression, we may see this effect change.
+
+## Positivity Rate
+
+The proportion of tests in which a positive result was achieved in detecting a pulmonary embolism will be referred to as the positivity rate. The overall positivity rate for this data was 10.93%, which corresponds to 296 positive test results. While this is descriptive of the patient base as a whole, the focus of the summary statistics in this section will be on the positivity rate for sub-groups of several key variables.
+
+#### Positivity and Radiation/Contrast
+
+Figure 3a gives the distribution of radiation administered to patients, group by whether or not their CT scan returned positive results. Figure 3b does the same for the distribution of contrast. In either case, a test result of 0 indicates a negative scan. There does not appear to be any substantial difference in the compounds administered to patients when we group by test result. One thing worth noting here is that when looking at the effective dose of radiation administered, we see more outliers in the case where test results ended up being negative. This would suggest that these patients are being unnecessarilly exposed to large amounts of radiation, the top end being over 100 sieverts.
+
+```{r}
+PE$PE.Num <- ifelse(PE$Pulmonary.Embolism == "NO", 0, 1)
+par(mfrow = c(1,2))
+boxplot(PE$Eff.Dose~PE$PE.Num, main = "Figure 3a: Distribution of Effective Dose",
+        xlab = "Test Result", ylab = "Effective Dose", cex.main = 0.75)
+boxplot(PE$Contrast.Given~PE$PE.Num, main = "Figure 3b: Distribution of Contrast Administered",
+        xlab = "Test Result", ylab = "Contrast", cex.main = 0.75)
+par(mfrow = c(1,1))
+```
+
+#### Positivity and Type of Procedure
+
+The three types of procedures present in the dataset are chest only, double rule out, and chest, abdomen, and pelvis. There was one case of a triple rule out, which has been excluded from analysis. Table 5 provides both the counts and positivity rate for these types of procedures. Although there appears to be a difference in positivity between Chest Only scans (10.9%) and CAP scans (12.3%), this difference was found to be non-significant through a two-proportion Z test (Z = 0.708, p = 0.239). Interestingly, all 43 double rule out procedures produced negative results, which may suggest that double rule out procedures are being over-used.
+
+\begin{table}[H] \centering 
+  \caption{Positivity Rate by Type of Procedure} 
+\begin{tabular}{p{5cm}p{3cm}p{3cm}}
+\\[-1.8ex] \hline 
+\hline
+ & n & Positivity \\
+\hline \\[-1.8ex] 
+Chest Only    & 2369 & 0.109  \\
+Chest, Abdomen, and Pelvis    & 301 & 0.123  \\
+Double Rule Out    & 43 & 0.000  \\
+\hline 
+\hline \\[-1.8ex]
+ \end{tabular}
+\end{table} 
+
+#### Positivity by Age and BMI
+
+Once again, we are interested in the rate of positive test results after subdividing the patients into the three age and BMI groups used previously. These positivity rates are given in Table 6. From this table it is hard to conclude anything regarding a pattern in positivity rate for Age group or BMI group. There may be a slight decrease in positivity for older age groups, but this may be caused by the relatively small sample size of younger patients.
+
+\begin{table}[H] \centering 
+  \caption{Positivity Rate by Age and BMI groups} 
+\begin{tabular}{p{1cm}p{1cm}|p{3cm}p{3cm}p{3cm}|p{2cm}}
+\\[-1.8ex] \hline 
+\hline
+ & & & BMI & \\
+ & & $<$25 & 25-40 & $>$40 \\ 
+\hline \\[-1.8ex] 
+    & $<$18 & 0.083 & 0.300 & 0.000 & 0.160 \\
+AGE & 18-35 & 0.116 & 0.124 & 0.115 & 0.117 \\
+    & $>$35 & 0.091 & 0.118 & 0.099 & 0.108 \\
+\hline
+    &       & 0.094 & 0.119 & 0.101 & 0.109 \\
+\hline 
+\hline \\[-1.8ex]
+ \end{tabular}
+\end{table} 
+
+
+#### Positivity and Location of Patient
+
+We are also interested in any difference in positivity dependent on where the patient came from prior to their CT scan. Both the number of patients from each location and the positivity rate are given in Table 7. We can see here that both the ICU and IN locations have a higher rate of positive test results than either the ED or OUT patients. While this appears to be a substantial difference given the sample size for each group, we will determine significance through later regression.
+
+\begin{table}[H] \centering 
+  \caption{Positivity Rate by Patient Location} 
+\begin{tabular}{p{3cm}p{3cm}p{3cm}}
+\\[-1.8ex] \hline 
+\hline
+ & n & Positivity \\
+\hline \\[-1.8ex] 
+ED    & 1537 & 0.096  \\
+OUT    & 352 & 0.085  \\
+IN    & 613 & 0.124  \\
+ICU & 211 & 0.153\\
+\hline 
+\hline \\[-1.8ex]
+ \end{tabular}
+\end{table} 
+
+
+## Positive Test Result Statistics
+
+Beyond simply looking at positivity rates, we are also interested in determining patterns within the group of patients that test positive for a pulmonary embolism. More specifically, we will be looking at differences in the type of pulmonary embolism as well as the type of strain detected by the CT scan. Overall, there were 296 patients who tested positive. One patient was recorded as testing positive but did not have information regarding the type of pulmonary embolism or strain, so they were removed from the following summaries, giving us 295 patients for analysis.
+
+#### Type of PE 
+
+The number of patients testing positive for each type of pulmonary embolism, divided by location of admittance, is given in Table 8. Here we notice that half of all patients testing positive come from the emergency department category. However, as we saw previously, ED had the lowest positivity rate of all locations, suggesting that the reason for having som many positive cases is that most patients receiving CT scans came from ED. We can also see that a majority of pulmonary embolisms detected are classified as peripheral. 
+
+\begin{table}[H] \centering 
+  \caption{Type of PE by Location Admitted} 
+\begin{tabular}{p{1.5cm}p{3.5cm}|p{2cm}p{2cm}p{2cm}p{2cm}|p{2cm}}
+\\[-1.8ex] \hline 
+\hline
+ & & &  \multicolumn{2}{c}{Location} & & \\
+ & & ED & OUT & IN & ICU & \\ 
+\hline \\[-1.8ex] 
+        & Central & 13 (4.4) & 0 (0.0) & 2 (0.7) & 2 (0.7) & 17 (5.8) \\
+PE Type & Central and Peripheral & 20 (6.8) & 1 (0.3) & 11 (3.7) & 10 (3.4) & 42 (14.2) \\
+        & Peripheral & 115 (39.0) & 17 (5.8) & 62 (21.0) & 42 (14.2) & 236 (80.0) \\
+\hline 
+    & & 148 (50.2) & 18 (6.1) & 75 (25.8) & 54 (18.3) & 295 (100.0) \\
+\hline 
+\hline \\[-1.8ex]
+\multicolumn{7}{l}{\textit{Note:} Percentage of total patients is given in parentheses}
+ \end{tabular}
+\end{table} 
+
+Table 9 shows the breakdown of type of PE by patient age. We find that a vast majority of positive test results come from patients over 35 years of age. Again however, this is not necessarily due to anything except the fact that most CT scans were performed on patients over 35. This is evidenced by the fact that this age range did not have a larger positivity rate than either of the other two. 
+
+\begin{table}[H] \centering 
+  \caption{Type of PE by Age Group} 
+\begin{tabular}{p{1.5cm}p{3.5cm}|p{2cm}p{2cm}p{2cm}|p{2cm}}
+\\[-1.8ex] \hline 
+\hline
+        & & & AGE & & \\
+        & & $<$18 & 18-35 & $>$35 &  \\ 
+\hline \\[-1.8ex] 
+        & Central & 0 (0.0) & 6 (2.0) & 11 (3.7) & 17 (5.8) \\
+PE Type & Central and Peripheral & 1 (0.3) & 7 (2.4) & 34 (11.5) & 42 (14.2) \\
+        & Peripheral & 3 (1.0) & 23 (7.8) & 210 (71.1) & 236 (80.0) \\
+\hline
+    & & 4 (1.4) & 36 (12.2) & 256 (86.8) & 295 (100) \\
+\hline 
+\hline \\[-1.8ex]
+\multicolumn{6}{l}{\textit{Note:} Percentage of total sample is given in parentheses}
+ \end{tabular}
+\end{table} 
+
+#### Type of Strain
+
+Similar to the type of pulmonary embolism detected, we are also interested in the distribution of whether a strain was  detected on the CT scan, grouped by location of patient admittance and age group. These data are given in Table 10 and 11, respectively. Here we see that a larger proportion of positive CT scans showed no strain. Again, we have higher incidence of strain in the ED and age over 35 categories due to the larger number of patients overall who fall into these groups. 
+
+\begin{table}[H] \centering 
+  \caption{Detection of Strain by Location Admitted} 
+\begin{tabular}{p{1cm}p{2cm}|p{2cm}p{2cm}p{2cm}p{2cm}|p{2cm}}
+\\[-1.8ex] \hline 
+\hline
+        & & & \multicolumn{2}{c}{Location} & & \\
+        & & ED & OUT & IN & ICU & \\ 
+\hline \\[-1.8ex] 
+        & No  & 88 (29.8) & 14 (4.7) & 51 (17.3) & 33 (11.2) & 186 (63.1) \\
+Strain  & Yes & 60 (20.3) & 4 (1.4) & 24 (8.1) & 21 (7.1) & 109 (36.9) \\
+\hline
+    & & 148 (50.2) & 18 (6.1) & 75 (25.4) & 54 (18.3) & 295 (100) \\
+\hline 
+\hline \\[-1.8ex]
+\multicolumn{7}{l}{\textit{Note:} Percentage of total sample is given in parentheses}
+ \end{tabular}
+\end{table} 
+
+\begin{table}[H] \centering 
+  \caption{Type of PE by Age Group} 
+\begin{tabular}{p{1cm}p{3cm}|p{3cm}p{3cm}p{3cm}|p{2cm}}
+\\[-1.8ex] \hline 
+\hline
+        & & & AGE &  \\
+        & & $<$18 & 18-35 & $>$35 &  \\ 
+\hline \\[-1.8ex] 
+        & No  & 2 (0.7) & 18 (6.1) & 166 (56.3) & 186 (63.1) \\
+Strain  & Yes & 2 (0.7) & 18 (6.1) & 89 (30.2) & 109 (36.9) \\
+\hline
+    &       & 4 (1.4) & 36 (12.2) & 256 (86.8) & 295 (100) \\
+\hline 
+\hline \\[-1.8ex]
+\multicolumn{6}{l}{\textit{Note:} Percentage of total sample is given in parentheses}
+ \end{tabular}
+\end{table} 
+
+## Next Steps
+
+All of these tables demonstrate a summary of how some of our variables of interest interact. It is important to note that no conclusions as to the significance of variable effects or differences can be draw here because no actual statistical tests have been carried out (apart from the two-sample proportions test for positivity in chest only and CAP scans).
+
+The next steps here will be to fit a logistic regression model for positivity using the key variables of interest listed above. Additionally, models for mean radiation and mean constrast will be fit to see which variables have significant effects.
