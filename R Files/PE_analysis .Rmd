@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 ## Reading in data
-PE <- read.csv("PE_clean.csv")
+PE <- read.csv("Data/1st_Set/PE_clean.csv")
 PE_noNA <- na.omit(PE)
 
 PE$Contrast.Given <- as.numeric(PE$Contrast.Given)
