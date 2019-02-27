@@ -97,17 +97,16 @@
 ## Warning: NAs introduced by coercion
 \end{verbatim}
 
-\subsection{Effective Dose}\label{effective-dose}
+\subsection{Effective Dose and
+Contrast}\label{effective-dose-and-contrast}
 
 \paragraph{Summary Statistics}\label{summary-statistics}
 
-Using the fixed data for effective dosage of radiation administered to
-patients, we retrieve the plots shown in Figure 1. Here we can see the
-right-skew in the histogram suggesting several patients recieved much
-higher amounts of radiation than average. The mean effective dose given
-to a patient was 5.631 millisieverts, with a range of 0.1 to 48.8
-millisieverts. Out of all 2382 patients, only 54 recieved a radiation
-dose above 20 millisieverts.
+Numerical summaries of both effective dose and contrast are given in
+Table 1. Using the fixed data for effective dosage of radiation
+administered to patients, we retrieve the plots shown in Figure 1. Here
+we can see the right-skew in the histogram suggesting several patients
+recieved much higher amounts of radiation than average.
 
 \begin{table}[H] \centering 
   \caption{Summary Statistics of Radiation and Contrast} 
@@ -130,18 +129,54 @@ Contrast       & 5.0 & 75.0 & 95.0 & 88.5 & 98.0 & 150.0 \\
 ##   0.098   3.055   4.298   5.631   6.356  48.832
 \end{verbatim}
 
-We are also interested in the relationship between the effecive dose
-administered and both the age and BMI of the patient. For the case of
-age, patients were grouped into 10-year age groups. The number of
-patients that belong to group is given below. Figure 2 shows the average
-radiation administered for each of these age groups.
-
-\begin{verbatim}
-##   <20 20-30 30-40 40-50 50-60 60-70 70-80 80-90   >90 
-##    55   133   222   294   514   562   397   179    26
-\end{verbatim}
+We also have constructed an updated histogram and boxplot for the amount
+of contrast given to patients, which are shown in Figure 2. Here we see
+a centralized distribution with some extreme values on both sides.
 
 \includegraphics{Updates_Writeup_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+We are also interested in the relationship of the effecive dose and
+contrast administered with both the age and BMI of the patient. Patients
+were divided into 10-year age groups and 5-unit BMI groups. In both
+cases, cut-off values were determined based on the number of patients
+that fell into the extreme groups. For example, there was only one
+patient in the data under the age of 10, so they were added into the
+``\textless{}20'' group. The number of patients that belong to each age
+group and BMI group is given in Table 2 and 3 respectively.
+
+\begin{table}[H] \centering 
+  \caption{Breakdown Patients by Age Group} 
+\begin{tabular}{p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}}
+\\[-1.8ex] \hline 
+\hline
+ <20 & 20-30 & 30-40 & 40-50& 50-60 & 60-70 & 70-80 & 80-90 & >90 \\ 
+ \hline \\[-1.8ex] 
+55 & 133 & 222 & 294 & 514 & 562 & 397 & 179 & 26 \\
+\hline 
+\hline \\[-1.8ex]
+ \end{tabular}
+\end{table}
+
+\begin{table}[H] \centering 
+  \caption{Breakdown Patients by BMI Group} 
+\begin{tabular}{p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}}
+\\[-1.8ex] \hline 
+\hline
+ <15 & 15-20 & 20-25 & 25-30 & 30-35 & 35-40 & 40-45 & 45-50 & 50-55 & 55-60 & >60 \\ 
+ \hline \\[-1.8ex] 
+14 & 158 & 486 & 595 & 467 & 276 & 171 & 106 & 56 & 21 & 32 \\
+\hline 
+\hline \\[-1.8ex]
+ \end{tabular}
+\end{table}
+
+Figure 3 shows the average radiation and contrast administered for each
+of the age groups, and Figure 4 shows the average radiation and contrast
+administered for the BMI groups.
+
+\includegraphics{Updates_Writeup_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\includegraphics{Updates_Writeup_files/figure-latex/unnamed-chunk-5-1.pdf}
 
 \subsection{Contrast Given}\label{contrast-given}
 
