@@ -1,0 +1,87 @@
+---
+title: "Update_Writeup"
+author: "Aidan Mullan"
+date: "2/26/2019"
+header-includes:
+  - \usepackage{float}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.pos = 'htb!')
+```
+
+```{r, echo = FALSE}
+library(readxl)
+PE <- read_excel("Data/Updates/Book2.xlsx")
+PE$BMI <- as.numeric(PE$BMI)
+PE <- na.omit(PE)
+
+age_cuts <- c("<20", "20-30", "30-40", "40-50","50-60", "60-70",
+              "70-80", "80-90", ">90")
+PE$Age10 <- cut(PE$Age, breaks = c(-1,seq(20,90,10), 110), labels = age_cuts)
+
+BMI_cuts <- c("10-15", "15-20", "20-25", "25-30","30-35", "35-40",
+              "40-45", "45-50", "50-55", "55-60", ">60")
+PE$BMI10 <- cut(PE$BMI, breaks = c(seq(10,60,5),92), labels = BMI_cuts)
+```
+
+
+## Effective Dose and Contrast
+
+#### Summary Statistics
+
+Numerical summaries of both effective dose and contrast are given in Table 1. Using the fixed data for effective dosage of radiation administered to patients, we retrieve the plots shown in Figure 1. Here we can see the right-skew in the histogram suggesting several patients recieved much higher amounts of radiation than average. 
+
+\begin{table}[H] \centering 
+  \caption{Summary Statistics of Radiation and Contrast} 
+\begin{tabular}{p{3cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}p{1cm}}
+\\[-1.8ex] \hline 
+\hline
+ & Min & 1st Q & Median & Mean & 3rd Q & Max \\ 
+\hline \\[-1.8ex] 
+Effective Dose & 0.10 & 3.06 & 4.30 & 5.631 & 6.36 & 48.83 \\
+Contrast       & 5.0 & 75.0 & 95.0 & 88.5 & 98.0 & 150.0 \\
+\hline 
+\hline \\[-1.8ex]
+ \end{tabular}
+\end{table}
+
+```{r, echo = FALSE}
+par(mfrow = c(1,2))
+hist(PE$`Eff Dose`, breaks = 20, main = "Figure 1a: Histogram of Effective Dose",
+     xlab = "Effective Dose", ylab = "No. Patients", cex.main = 0.75)
+axis(side = 1, at = seq(0,100,10))
+boxplot(PE$`Eff Dose`, main = "Figure 1b: Boxplot of Effective Dose", cex.main = 0.75, 
+        ylab = "Effective Dose")
+axis(side = 2, at = seq(0,100,10))
+par(mfrow = c(1,1))
+summary(PE$`Eff Dose`)
+```
+
+We also have constructed an updated histogram and boxplot for the amount of contrast given to patients, which are shown in Figure 2. Here we see a centralized distribution with some extreme values on both sides. 
+
+```{r}
+par(mfrow = c(1,2))
+hist(PE$`Contrast Given`, breaks = 20, main = "Figure 2a: Histogram of Contrast Given",
+     xlab = "Contrast Given", ylab = "No. Patients", cex.main = 0.75)
+boxplot(PE$`Contrast Given`, main = "Figure 2b: Boxplot of Contrast Given", cex.main = 0.75, 
+        ylab = "Contrast Given", yaxp = c(0,150,10))
+par(mfrow = c(1,1))
+```
+
+
+We are also interested in the relationship of the effecive dose and contrast administered with both the age and BMI of the patient. Patients were divided into 10-year age groups and 5-unit BMI groups. In both cases, cut-off values were determined based on the number of patients that fell into the extreme groups. For example, there was only one patient in the data under the age of 10, so they were added into the "<20" group. The number of patients that belong to each age group and BMI group is given in Table 2 and 3 respectively. Figure 3 shows the average radiation administered for each of these age groups.
+
+```{r}
+summary(PE$Age10)
+rad_by_age <- tapply(PE$`Eff Dose`, PE$Age10, "mean")
+plot(rad_by_age, type = "l", ylab = "Effective Dose", xlab = "Age Group", xaxt = "n",
+     main = "Figure 3: Mean Effective Dose by Age", ylim = c(3,7))
+points(rad_by_age)
+axis(1, at = 1:9, labels = age_cuts, cex.axis = .75)
+```
+
+
+
+## Contrast Given
