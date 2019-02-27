@@ -1,0 +1,32 @@
+---
+title: "Update_Cleaning"
+author: "Aidan Mullan"
+date: "2/27/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+PE_raw <- read_excel("Data/Updates/chest_only.xlsx")
+names(PE_raw)
+
+PE_short <- PE_raw[1:2413,c(3,4,6,8,9,11,12,13)]
+unique(PE_short$Location)
+
+PE_short$Location <- ifelse(PE_short$Location == "Out", "OUT", 
+                       ifelse(PE_short$Location == "In", "IN", PE_short$Location))
+PE_short$BMI <- as.numeric(PE_short$BMI)
+PE_short$`Contrast Given` <- as.numeric(PE_short$`Contrast Given`)
+PE_short$`CT Type` <- ifelse(PE_short$`CT Type` %in% c("DS_Force", "DS_Drive"),
+                             "DS_Scanner", PE_short$`CT Type`)
+PE_short$Procedure <- ifelse(PE_short$Procedure == "Chest only", "Chest Only", PE_short$Procedure)
+
+PE_chest <- subset(PE_short, subset = Procedure == "Chest Only")
+PE <- na.omit(PE_chest)
+
+write.csv(PE, file = "PE_update_clean.csv")
+```
+

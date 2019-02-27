@@ -12,8 +12,7 @@ knitr::opts_chunk$set(echo = FALSE, fig.pos = 'htb!')
 ```
 
 ```{r, echo = FALSE}
-library(readxl)
-PE <- read_excel("Data/Updates/Book2.xlsx")
+PE <- read.csv("Data/Updates/PE_update_clean.csv")
 PE$BMI <- as.numeric(PE$BMI)
 PE <- na.omit(PE)
 
@@ -49,23 +48,22 @@ Contrast       & 5.0 & 75.0 & 95.0 & 88.5 & 98.0 & 150.0 \\
 
 ```{r, echo = FALSE}
 par(mfrow = c(1,2))
-hist(PE$`Eff Dose`, breaks = 20, main = "Figure 1a: Histogram of Effective Dose",
+hist(PE$Eff.Dose, breaks = 20, main = "Figure 1a: Histogram of Effective Dose",
      xlab = "Effective Dose", ylab = "No. Patients", cex.main = 0.75)
 axis(side = 1, at = seq(0,100,10))
-boxplot(PE$`Eff Dose`, main = "Figure 1b: Boxplot of Effective Dose", cex.main = 0.75, 
+boxplot(PE$Eff.Dose, main = "Figure 1b: Boxplot of Effective Dose", cex.main = 0.75, 
         ylab = "Effective Dose")
 axis(side = 2, at = seq(0,100,10))
 par(mfrow = c(1,1))
-summary(PE$`Eff Dose`)
 ```
 
 We also have constructed an updated histogram and boxplot for the amount of contrast given to patients, which are shown in Figure 2. Here we see a centralized distribution with some extreme values on both sides. 
 
 ```{r}
 par(mfrow = c(1,2))
-hist(PE$`Contrast Given`, breaks = 20, main = "Figure 2a: Histogram of Contrast Given",
+hist(PE$Contrast.Given, breaks = 20, main = "Figure 2a: Histogram of Contrast Given",
      xlab = "Contrast Given", ylab = "No. Patients", cex.main = 0.75)
-boxplot(PE$`Contrast Given`, main = "Figure 2b: Boxplot of Contrast Given", cex.main = 0.75, 
+boxplot(PE$Contrast.Given, main = "Figure 2b: Boxplot of Contrast Given", cex.main = 0.75, 
         ylab = "Contrast Given", yaxp = c(0,150,10))
 par(mfrow = c(1,1))
 ```
@@ -103,13 +101,13 @@ Figure 3 shows the average radiation and contrast administered for each of the a
 
 ```{r, fig.height = 5, fig.width = 10}
 par(mfrow = c(1,2))
-rad_by_age <- tapply(PE$`Eff Dose`, PE$Age10, "mean")
+rad_by_age <- tapply(PE$Eff.Dose, PE$Age10, "mean")
 plot(rad_by_age, type = "l", ylab = "Effective Dose", xlab = "Age Group", xaxt = "n",
      main = "Figure 3a: Mean Effective Dose by Age", ylim = c(3,7), cex.main = 1)
 points(rad_by_age)
 axis(1, at = 1:9, labels = age_cuts, cex.axis = .7, mgp = c(3,0.5,0))
 
-contrast_by_age <- tapply(PE$`Contrast Given`, PE$Age10, "mean")
+contrast_by_age <- tapply(PE$Contrast.Given, PE$Age10, "mean")
 plot(contrast_by_age, type = "l", ylab = "Contrast Given", xlab = "Age Group", xaxt = "n",
      main = "Figure 3b: Mean Contrast Administered by Age", cex.main = 1, yaxt = "n", ylim = c(75,95))
 points(contrast_by_age)
@@ -120,13 +118,13 @@ par(mfrow = c(1,1))
 
 ```{r, fig.height = 5, fig.width = 10}
 par(mfrow = c(1,2))
-rad_by_bmi <- tapply(PE$`Eff Dose`, PE$BMI10, "mean")
+rad_by_bmi <- tapply(PE$Eff.Dose, PE$BMI10, "mean")
 plot(rad_by_bmi, type = "l", ylab = "Effective Dose", xlab = "BMI Group", xaxt = "n",
      main = "Figure 4a: Mean Effective Dose by BMI", cex.main = 1)
 points(rad_by_bmi)
 axis(1, at = 1:11, labels = BMI_cuts, cex.axis = .7, mgp = c(3,0.5,0))
 
-contrast_by_bmi <- tapply(PE$`Contrast Given`, PE$BMI10, "mean")
+contrast_by_bmi <- tapply(PE$Contrast.Given, PE$BMI10, "mean")
 plot(contrast_by_bmi, type = "l", ylab = "Contrast Given", xlab = "BMI Group", xaxt = "n",
      main = "Figure 4b: Mean Contrast Administered by BMI", cex.main = 1)
 points(contrast_by_bmi)

@@ -88,15 +88,6 @@
 \begin{document}
 \maketitle
 
-\begin{verbatim}
-## Warning in read_fun(path = path, sheet_i = sheet, limits = limits, shim =
-## shim, : Expecting numeric in I1195 / R1195C9: got 'l00'
-\end{verbatim}
-
-\begin{verbatim}
-## Warning: NAs introduced by coercion
-\end{verbatim}
-
 \subsection{Effective Dose and
 Contrast}\label{effective-dose-and-contrast}
 
@@ -123,11 +114,6 @@ Contrast       & 5.0 & 75.0 & 95.0 & 88.5 & 98.0 & 150.0 \\
 \end{table}
 
 \includegraphics{Updates_Writeup_files/figure-latex/unnamed-chunk-2-1.pdf}
-
-\begin{verbatim}
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##   0.098   3.055   4.298   5.631   6.356  48.832
-\end{verbatim}
 
 We also have constructed an updated histogram and boxplot for the amount
 of contrast given to patients, which are shown in Figure 2. Here we see
@@ -178,7 +164,22 @@ administered for the BMI groups.
 
 \includegraphics{Updates_Writeup_files/figure-latex/unnamed-chunk-5-1.pdf}
 
-\subsection{Contrast Given}\label{contrast-given}
+Interestingly, we see nearly identical patterns for both the radiation
+and contrast administered when divided into either age groups or BMI
+groups. For age, we see a nearly quadratic relationship, with more
+radiation and contrast being administered for groups between 30 and 60
+years of age, and lower amounts administered to both younger and older
+groups.
+
+On the other hand, we have seem to have a purely increasing relationship
+for radiation and contrast with BMI. As a patient's BMI increases, we
+can see that the average effective dosage and amount of contrast given
+both increase.
+
+From these results, it appears that the amount of radiation and contrast
+administered to a patient are correlated. Indeed, we find a Pearson's
+correlation of 0.47, which is significant (t(2380) = 26.05, p
+\textless{} .001).
 
 
 \end{document}

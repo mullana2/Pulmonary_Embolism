@@ -10,29 +10,26 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-library(readxl)
-PE <- read_excel("Data/Updates/Book2.xlsx")
-PE$BMI <- as.numeric(PE$BMI)
-PE <- na.omit(PE)
-summary(PE)
+PE <- read.csv("Data/Updates/PE_update_clean.csv")[,-1]
 ```
+
 
 ```{r}
 
 ## Looking at Contrast: Histogram and Boxplot
 par(mfrow = c(1,2))
-hist(PE$`Contrast Given`, breaks = 20, main = "Figure 2a: Histogram of Contrast Given",
+hist(PE$Contrast.Given, breaks = 20, main = "Figure 2a: Histogram of Contrast Given",
      xlab = "Contrast Given", ylab = "No. Patients", cex.main = 0.75)
-boxplot(PE$`Contrast Given`, main = "Figure 2b: Boxplot of Contrast Given", cex.main = 0.75, 
+boxplot(PE$Contrast.Given, main = "Figure 2b: Boxplot of Contrast Given", cex.main = 0.75, 
         ylab = "Contrast Given", yaxp = c(0,150,10))
 par(mfrow = c(1,1))
 
 ## Looking at Effective Dose: Histogram and Boxplot
 par(mfrow = c(1,2))
-hist(PE$`Eff Dose`, breaks = 20, main = "Figure 1a: Histogram of Effective Dose",
+hist(PE$Eff.Dose, breaks = 20, main = "Figure 1a: Histogram of Effective Dose",
      xlab = "Effective Dose", ylab = "No. Patients", cex.main = 0.75)
 axis(side = 1, at = seq(0,100,10))
-boxplot(PE$`Eff Dose`, main = "Figure 1b: Boxplot of Effective Dose", cex.main = 0.75, 
+boxplot(PE$Eff.Dose, main = "Figure 1b: Boxplot of Effective Dose", cex.main = 0.75, 
         ylab = "Effective Dose")
 axis(side = 2, at = seq(0,100,10))
 par(mfrow = c(1,1))
@@ -45,14 +42,14 @@ age_cuts <- c("<10", "10-20", "20-30", "30-40", "40-50","50-60", "60-70",
 PE$Age10 <- cut(PE$Age, breaks = seq(0,110,10), labels = age_cuts)
 summary(PE$Age10)
 
-contrast_by_age <- tapply(PE$`Contrast Given`, PE$Age10, "mean")
+contrast_by_age <- tapply(PE$Contrast.Given, PE$Age10, "mean")
 plot(contrast_by_age, type = "l", ylab = "Contrast Given", xlab = "Age Group", xaxt = "n",
      main = "Avergae Contrast Administered by Age")
 points(contrast_by_age)
 axis(1, at = 1:11, labels = age_cuts, cex.axis = .75)
 
 ## Plotting Radiation by Age (10 Year Intervals)
-rad_by_age <- tapply(PE$`Eff Dose`, PE$Age10, "mean")
+rad_by_age <- tapply(PE$Eff.Dose, PE$Age10, "mean")
 plot(rad_by_age, type = "l", ylab = "Effective Dose", xlab = "Age Group", xaxt = "n",
      main = "Mean Effective Dose by Age")
 points(rad_by_age)
@@ -64,19 +61,39 @@ BMI_cuts <- c("10-15", "15-20", "20-25", "25-30","30-35", "35-40",
 PE$BMI10 <- cut(PE$BMI, breaks = c(seq(10,60,5),92), labels = BMI_cuts)
 summary(PE$BMI10)
 
-contrast_by_bmi <- tapply(PE$`Contrast Given`, PE$BMI10, "mean")
+contrast_by_bmi <- tapply(PE$Contrast.Given, PE$BMI10, "mean")
 plot(contrast_by_bmi, type = "l", ylab = "Contrast Given", xlab = "BMI Group", xaxt = "n",
      main = "Avergae Contrast Administered by BMI")
 points(contrast_by_bmi)
 axis(1, at = 1:11, labels = BMI_cuts, cex.axis = .75)
 
 ## Plotting Radiation by BMI (5 Unit Intervals)
-rad_by_bmi <- tapply(PE$`Eff Dose`, PE$BMI10, "mean")
+rad_by_bmi <- tapply(PE$Eff.Dose, PE$BMI10, "mean")
 plot(rad_by_bmi, type = "l", ylab = "Effective Dose", xlab = "BMI Group", xaxt = "n",
      main = "Mean Effective Dose by BMI")
 points(rad_by_bmi)
 axis(1, at = 1:11, labels = BMI_cuts, cex.axis = .75)
 ```
+
+#####----------------------------------------------------
+
+#####----------------------------------------------------
+
+#####----------------------------------------------------
+
+
+```{r}
+PE$Age_range <- cut(PE$Age, breaks = c(0,18,35,110), labels = c("<18", "18-35", ">35"))
+PE$BMI_range <- cut(PE$BMI, breaks = c(0,25,40,100), labels = c("<25", "25-40", ">40"))
+
+effdose1 <- lm(log(Eff.Dose)~CT.Type+BMI_range+Age_range+Gender+Location, data = PE)
+```
+
+```{r}
+contrast1 <- lm(Contrast.Given~CT.Type+BMI_range+Age_range+Gender+Location, data = PE)
+```
+
+
 
 
 
