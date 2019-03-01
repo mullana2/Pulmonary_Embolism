@@ -126,15 +126,85 @@ axis(1, at = 1:11, labels = BMI_cuts, cex.axis = .7, mgp = c(3,0.5,0))
 
 contrast_by_bmi <- tapply(PE$Contrast.Given, PE$BMI10, "mean")
 plot(contrast_by_bmi, type = "l", ylab = "Contrast Given", xlab = "BMI Group", xaxt = "n",
-     main = "Figure 4b: Mean Contrast Administered by BMI", cex.main = 1)
+     main = "Figure 4b: Mean Contrast Administered by BMI", cex.main = 1, ylim = c(75,96))
 points(contrast_by_bmi)
 axis(1, at = 1:11, labels = BMI_cuts, cex.axis = .7, mgp = c(3,0.5,0))
+axis(2, at = seq(75,95,5))
 par(mfrow = c(1,1))
 ```
 
-Interestingly, we see nearly identical patterns for both the radiation and contrast administered when divided into either age groups or BMI groups. For age, we see a nearly quadratic relationship, with more radiation and contrast being administered for groups between 30 and 60 years of age, and lower amounts administered to both younger and older groups. 
+For our age groups, we see a nearly quadratic relationship with effective dose, with more radiation and contrast being administered for groups between 30 and 60 years of age, and lower amounts administered to both younger and older groups. There doesn't appear to be any prominent relationship between age and contrast.
 
-On the other hand, we have seem to have a purely increasing relationship for radiation and contrast with BMI. As a patient's BMI increases, we can see that the average effective dosage and amount of contrast given both increase.
+Now looking at BMI, there appears to be a linear association between radiation and BMI, with an increase in effective dose as BMI increases. Again, there does not appear to be any relationship between contrast and BMI
 
 From these results, it appears that the amount of radiation and contrast administered to a patient are correlated. Indeed, we find a Pearson's correlation of 0.47, which is significant (t(2380) = 26.05, p < .001). 
 
+## Effective Dose Model
+
+With the fixed values for effective dose, we refit our linear model. Again, a log-transformation was performed to normalize the effective dose variable. The initial predictors considered were CT Type, BMI (<25, 25-40, >40), Age (<18, 18-35, >35), Gender, and Location of Admission. From the initial model, the only significant location factor was the ICU. In this case, we condensed the \textit{Location} variable into two groups: patients admitted in the ICU and other patients. No significant difference in predictive accuracy was determined between the model with the full location variable and the model with the condensed location variable, so we prefer the condensed model. The final model with coefficients is given in Table 4. The baseline factors for each variable are: BMI: <25, Location: ICU, CT: 128SSwIR, Age: <18, Gender: Female.
+
+\begin{table}[H] \centering 
+  \caption{Effective Dosage Model Coefficients} 
+\begin{tabular}{p{3cm}|p{3cm}p{3cm}p{3cm}}
+\\[-1.8ex] \hline 
+\hline
+    & Estimate & Std. Error & p  \\
+\hline \\[-1.8ex] 
+ Intercept   & 0.472 & 0.111 & .027 $***$ \\
+ BMI 25-40   & 0.516 & 0.023 & <.001 $***$\\
+ BMI $>$40   & 1.156 & 0.032 & <.001 $***$\\
+ Loc: Other  & $-$0.106 & 0.032 & <.001 $***$\\
+ CT: 64SSwIR & 0.019 & .049 & .699  \\
+ CT: 64SSWoIR & 0.582 & 0.065 & <.001 $***$ \\
+ CT: DS Scanner &$-$0.203 & 0.021 & <.001 $***$ \\
+ Age: 18-35 & 0.611 & 0.111 & <.001 $***$\\
+ Age: $>$35 & 0.624 & 0.107 & <.001 $***$ \\
+ Gender: Male & 0.227 & 0.020 & <.001 $***$ \\
+\hline 
+\hline \\[-1.8ex]
+\multicolumn{4}{l}{\textit{Note:} Significance: $.$ < .1, $*$ <.05, $**$ < .01, $***$ < .001}
+ \end{tabular}
+\end{table}
+
+#### Comparison of Scanner Type
+
+Post-hoc analysis using Tukey's HSD was conducted for the difference in effective dosage administered based on the type of scanner being used. This analysis found that DS scanners were associated with significantly lower radiation levels than all of the other scanners ($p < .001$ for all 3). Moreover, the 64SSwIR scanner had significantly higher radiation levels than both the 64SSwoIR and 128SSwIR ($p<.001$ for both). Lastly, there was no difference in effective dose between the 64SSwIR and the 128SSwIR scanners.
+
+The following illustrate the differences in effective dose by scanner as determined by our model:
+\begin{itemize}
+\item The DS scanners was associated with 81.6\% of the radiation given for the 128SSwIR scanner and 80.1\% of the radiation used for the 64SSwIR scanner, decreases of 18.4\% and 19.9\% respectively
+\item The DS scanners was associated with 45.6\% of the radiation given for the 64SSwoIR scanner, a decrease of 54.4\%
+\item The 64SSwoIR scanner was associate with a 67.5\% increase in radiation over the 128SSwIR scanner, and a 64.4\% increase in radiation over the 64SSwIR scanner 
+\end{itemize}
+
+To note, since there was no significant difference between the 64SSwIR and 128SSwIR scanners, the first and third bullet points above can be generalized. This would tells us that DS scanners use ~19\% less radiation than the IR scanners, and the 64SSwoIR scanners use ~65\% more radiation than the IR scanners.
+
+## Contrast Model
+
+We also refit the contrast model using the updated data set. We considered a full model including CT Type, BMI (<25, 25-40, >40), Age (<18, 18-35, >35), Gender, and Location of Admission. Model coefficients are given in Table 5. Interestingly, with the updated data we no longer have significance for Age groups, BMI groups, or Gender. This would suggest that some of the erratic values from the previous dataset that have been removed were strongly linked to specific age, BMI, and gender levels.
+
+\begin{table}[H] \centering 
+  \caption{Contrast Model Coefficients} 
+\begin{tabular}{p{3cm}|p{3cm}p{3cm}p{3cm}}
+\\[-1.8ex] \hline 
+\hline
+    & Estimate & Std. Error & p  \\
+\hline \\[-1.8ex] 
+ Intercept   & 88.580 & 0.592 & .027 $***$ \\
+ CT: 64SSwIR & $-$6.953 & 1.831 & <.001 $***$  \\
+ CT: 64SSWoIR & $-$0.214 & 2.376 & .928 \\
+ CT: DS Scanner &$-$1.799 & 0.751 & .017 $*$ \\
+ Loc: ICU & 3.411 & 1.161 & .003 $**$\\
+ Loc: IN & 1.635 & 0.900 & .069 $.$ \\
+ Loc: OUT & 4.188 & 1.435 & .004 $**$ \\
+\hline 
+\hline \\[-1.8ex]
+\multicolumn{4}{l}{\textit{Note:} Significance: $.$ < .1, $*$ <.05, $**$ < .01, $***$ < .001}
+ \end{tabular}
+\end{table}
+
+#### Comparison of Scanner Type
+
+As with the effective dose model, post hoc analysis using Tukey's HSD for the type of scanner. Here we find that the only significant difference was between the 64SSwIR and 64SSwoIR scanners ($p = .022$). From our model, this difference equates to the 64SSwIR scanners using 6.95 units less contrast than the 64SSwoIR scanners.
+
+The interesting part of this finding is that our model found a significant effect for DS Scanners over 128SSwIR scanners, but the post-hoc analysis did not. Tukey's HSD tends to be more conservative, and so it is more difficult to find significance. This is primarily to account for the number of pair-wise comparisons being made, whereas standard linear regression does not need to account for this.
