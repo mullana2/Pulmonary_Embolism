@@ -137,8 +137,6 @@ For our age groups, we see a nearly quadratic relationship with effective dose, 
 
 Now looking at BMI, there appears to be a linear association between radiation and BMI, with an increase in effective dose as BMI increases. Again, there does not appear to be any relationship between contrast and BMI
 
-From these results, it appears that the amount of radiation and contrast administered to a patient are correlated. Indeed, we find a Pearson's correlation of 0.47, which is significant (t(2380) = 26.05, p < .001). 
-
 ## Effective Dose Model
 
 With the fixed values for effective dose, we refit our linear model. Again, a log-transformation was performed to normalize the effective dose variable. The initial predictors considered were CT Type, BMI (<25, 25-40, >40), Age (<18, 18-35, >35), Gender, and Location of Admission. From the initial model, the only significant location factor was the ICU. In this case, we condensed the \textit{Location} variable into two groups: patients admitted in the ICU and other patients. No significant difference in predictive accuracy was determined between the model with the full location variable and the model with the condensed location variable, so we prefer the condensed model. The final model with coefficients is given in Table 4. The baseline factors for each variable are: BMI: <25, Location: ICU, CT: 128SSwIR, Age: <18, Gender: Female.
