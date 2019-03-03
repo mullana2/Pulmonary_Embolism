@@ -135,7 +135,7 @@ par(mfrow = c(1,1))
 
 For our age groups, we see a nearly quadratic relationship with effective dose, with more radiation and contrast being administered for groups between 30 and 60 years of age, and lower amounts administered to both younger and older groups. There doesn't appear to be any prominent relationship between age and contrast.
 
-Now looking at BMI, there appears to be a linear association between radiation and BMI, with an increase in effective dose as BMI increases. Again, there does not appear to be any relationship between contrast and BMI
+Now looking at BMI, there appears to be a linear association between radiation and BMI, with an increase in effective dose as BMI increases. Again, there does not appear to be any relationship between contrast and BMI.
 
 ## Effective Dose Model
 
@@ -203,6 +203,6 @@ We also refit the contrast model using the updated data set. We considered a ful
 
 #### Comparison of Scanner Type
 
-As with the effective dose model, post hoc analysis using Tukey's HSD for the type of scanner. Here we find that the only significant difference was between the 64SSwIR and 64SSwoIR scanners ($p = .022$). From our model, this difference equates to the 64SSwIR scanners using 6.95 units less contrast than the 64SSwoIR scanners.
+As with the effective dose model, post hoc analysis was conducted using Tukey's HSD for the type of scanner. Here we find that the only significant difference was between the 64SSwIR and 64SSwoIR scanners ($p = .022$). From our model, this difference equates to the 64SSwIR scanners using 6.95 units less contrast than the 64SSwoIR scanners.
 
 The interesting part of this finding is that our model found a significant effect for DS Scanners over 128SSwIR scanners, but the post-hoc analysis did not. Tukey's HSD tends to be more conservative, and so it is more difficult to find significance. This is primarily to account for the number of pair-wise comparisons being made, whereas standard linear regression does not need to account for this.
