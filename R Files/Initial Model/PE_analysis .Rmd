@@ -11,10 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 ## Reading in data
-PE <- read.csv("Data/1st_Set/PE_clean.csv")
-PE_noNA <- na.omit(PE)
-
-PE$Contrast.Given <- as.numeric(PE$Contrast.Given)
+PE_oldraw <- read.csv("Data/1st_Set/PE_clean.csv")
+PE_old <- na.omit(subset(PE_oldraw[,c(3,4,5,7:13,16,17)], subset = Procedure == "Chest Only"))
 ```
 
 ```{r}
@@ -22,25 +20,25 @@ PE$Contrast.Given <- as.numeric(PE$Contrast.Given)
 ## Summ Stats for Effective Dose and Contrast
 #####-----------------
 
-summary(PE$Eff.Dose)
-summary(PE$Contrast.Given)
+summary(PE_old$Eff.Dose)
+summary(PE_old$Contrast.Given)
 
 ## Looking at Contrast alone: Histogram and Boxplot
 par(mfrow = c(1,2))
-hist(PE$Contrast.Given, breaks = 20, main = "Figure 2a: Histogram of Contrast Given",
+hist(PE_old$Contrast.Given, breaks = 20, main = "Figure 2a: Histogram of Contrast Given",
      xlab = "Contrast Given", ylab = "No. Patients", cex.main = 0.75)
-boxplot(PE$Contrast.Given, main = "Figure 2b: Boxplot of Contrast Given", cex.main = 0.75, 
+boxplot(PE_old$Contrast.Given, main = "Figure 2b: Boxplot of Contrast Given", cex.main = 0.75, 
         ylab = "Contrast Given")
 axis(side = 2, at = seq(0,100,10))
 par(mfrow = c(1,1))
-summary(PE$Contrast.Given)
+summary(PE_old$Contrast.Given)
 
 ## Looking at Effective Dose Alone: Histogram and Boxplot
 par(mfrow = c(1,2))
-hist(PE$Eff.Dose, breaks = 20, main = "Figure 1a: Histogram of Effective Dose",
+hist(PE_old$Eff.Dose, breaks = 20, main = "Figure 1a: Histogram of Effective Dose",
      xlab = "Effective Dose", ylab = "No. Patients", cex.main = 0.75)
 axis(side = 1, at = seq(0,100,10))
-boxplot(PE$Eff.Dose, main = "Figure 1b: Boxplot of Effective Dose", cex.main = 0.75, 
+boxplot(PE_old$Eff.Dose, main = "Figure 1b: Boxplot of Effective Dose", cex.main = 0.75, 
         ylab = "Effective Dose")
 axis(side = 2, at = seq(0,100,10))
 par(mfrow = c(1,1))
@@ -48,22 +46,22 @@ par(mfrow = c(1,1))
 
 
 ## Comparing Age and BMI groups for Eff Dose and Contrast
-table(PE$Age_range, PE$BMI_range)
+table(PE_old$Age_range, PE$BMI_range)
 
-aggregate(Eff.Dose~Age_range+BMI_range, data = PE, FUN = "mean")
-aggregate(Eff.Dose~Age_range, data = PE, FUN = "mean")
-aggregate(Eff.Dose~BMI_range, data = PE, FUN = "mean")
+aggregate(Eff.Dose~Age_range+BMI_range, data = PE_old, FUN = "mean")
+aggregate(Eff.Dose~Age_range, data = PE_old, FUN = "mean")
+aggregate(Eff.Dose~BMI_range, data = PE_old, FUN = "mean")
 
 ## Contrast given by age group and BMI group
-aggregate(Contrast.Given~Age_range+BMI_range, data = PE, FUN = "mean")
-aggregate(Contrast.Given~Age_range, data = PE, FUN = "mean")
-aggregate(Contrast.Given~BMI_range, data = PE, FUN = "mean")
+aggregate(Contrast.Given~Age_range+BMI_range, data = PE_old, FUN = "mean")
+aggregate(Contrast.Given~Age_range, data = PE_old, FUN = "mean")
+aggregate(Contrast.Given~BMI_range, data = PE_old, FUN = "mean")
 
 ## Comparing Scanner Type for Eff Dose and Contrast
-aggregate(Eff.Dose~CT.Type, data = PE, FUN = "mean")
-aggregate(Contrast.Given~CT.Type, data = PE, FUN = "mean")
-aggregate(Eff.Dose~CT.Type, data = PE, FUN = "sd")
-aggregate(Contrast.Given~CT.Type, data = PE, FUN = "sd")
+aggregate(Eff.Dose~CT.Type, data = PE_old, FUN = "mean")
+aggregate(Contrast.Given~CT.Type, data = PE_old, FUN = "mean")
+aggregate(Eff.Dose~CT.Type, data = PE_old, FUN = "sd")
+aggregate(Contrast.Given~CT.Type, data = PE_old, FUN = "sd")
 ```
 
 
@@ -77,7 +75,7 @@ PE$PE.Num <- ifelse(PE$Pulmonary.Embolism == "NO", 0, 1)
 mean(PE$PE.Num)
 
 ## Positivity by Procedure Type
-aggregate(PE.Num~Procedure, data = PE, FUN = "mean")
+aggregate(PE.Num~Procedure, data = PE_old, FUN = "mean")
 
 ## Two-proportion Z test
 p1 <- 0.1093; p2 <- 0.1229; n1 <- 2369; n2 <- 301
@@ -87,12 +85,12 @@ pnorm(z)
 
 ## Positivity by Age/BMI
 mean(PE$PE.Num)
-aggregate(PE.Num~Age_range, data = PE, FUN = "mean")
-aggregate(PE.Num~BMI_range, data = PE, FUN = "mean")
-aggregate(PE.Num~Age_range+BMI_range, data = PE, FUN = "mean")
+aggregate(PE.Num~Age_range, data = PE_old, FUN = "mean")
+aggregate(PE.Num~BMI_range, data = PE_old, FUN = "mean")
+aggregate(PE.Num~Age_range+BMI_range, data = PE_old, FUN = "mean")
 
 ## Positivity by Location
-aggregate(PE.Num~Location, data = PE, FUN = "mean")
+aggregate(PE.Num~Location, data = PE_old, FUN = "mean")
 table(PE$Location)
 ```
 
@@ -101,7 +99,7 @@ table(PE$Location)
 ## Summ Stats for Patients Testing Positive
 ####------------------
 
-PE_Pos <- subset(PE, subset = PE.Num == 1)
+PE_Pos <- subset(PE_old, subset = PE.Num == 1)
 
 ## Type by Location
 table(PE_Pos$Type, PE_Pos$Location)
@@ -126,7 +124,7 @@ table(PE_Pos$Strain, PE_Pos$Age_range)
 #####------------------
 
 positivity1 <- glm(PE.Num~Gender+Age_range+Eff.Dose+BMI_range+Procedure+CT.Type+Location,
-               family = "binomial", data = PE)
+               family = "binomial", data = PE_old)
 summary(positivity1)
 
 positivity2 <- update(positivity1, .~.-CT.Type)
@@ -158,7 +156,7 @@ summary(positivity7)
 
 ```{r}
 ## Removing double rule out procedure from analysis due to no positive test results
-PE_nodub <- subset(PE, subset = Procedure != "Double rule out")
+PE_nodub <- subset(PE_old, subset = Procedure != "Double rule out")
 pos_nodub1 <- glm(PE.Num~Gender+Age_range+Eff.Dose+BMI_range+Procedure+CT.Type+Location,
                family = "binomial", data = PE_nodub)
 summary(pos_nodub1)
@@ -175,7 +173,7 @@ summary(pos_nodub2)
 ## Effective Dose Model
 #####----------------
 
-effdose1 <- lm(log(Eff.Dose)~CT.Type+BMI_range+Age_range+Gender+Location, data = PE)
+effdose1 <- lm(log(Eff.Dose)~CT.Type+BMI_range+Age_range+Gender+Location, data = PE_old)
 summary(effdose1)
 
 effdose2 <- update(effdose1, .~.-Location)
@@ -188,9 +186,50 @@ anova(effdose1, effdose2)
 ## Contrast Model
 #####----------------
 
-contrast1 <- lm(Contrast.Given~CT.Type+BMI_range+Age_range+Gender+Location, data = PE)
+contrast1 <- lm(Contrast.Given~CT.Type+BMI_range+Age_range+Gender+Location, data = PE_old)
 summary(contrast1)
 ```
+
+```{r}
+#####---------------
+## Plotting Contrast by Age and BMI
+#####---------------
+
+age_cuts <- c("<20", "20-30", "30-40", "40-50","50-60", "60-70",
+              "70-80", "80-90", ">90")
+PE_old$Age10 <- cut(PE_old$Age, breaks = c(-1,seq(20,90,10), 110), labels = age_cuts)
+
+BMI_cuts <- c("10-15", "15-20", "20-25", "25-30","30-35", "35-40",
+              "40-45", "45-50", "50-55", "55-60", ">60")
+PE_old$BMI10 <- cut(PE_old$BMI, breaks = c(seq(10,60,5),92), labels = BMI_cuts)
+summary(PE_old$Age10)
+summary(PE_old$BMI10)
+
+contrast_by_age <- tapply(PE_old$Contrast.Given, PE_old$Age10, "mean")
+plot(contrast_by_age, type = "l", ylab = "Contrast Given", xlab = "Age Group", xaxt = "n",
+     main = "Avergae Contrast Administered by Age")
+points(contrast_by_age)
+axis(1, at = 1:9, labels = age_cuts, cex.axis = .75)
+
+contrast_by_bmi <- tapply(PE_old$Contrast.Given, PE_old$BMI10, "mean")
+plot(contrast_by_bmi, type = "l", ylab = "Contrast Given", xlab = "BMI Group", xaxt = "n",
+     main = "Avergae Contrast Administered by BMI")
+points(contrast_by_bmi)
+axis(1, at = 1:11, labels = BMI_cuts, cex.axis = .75)
+
+rad_by_age <- tapply(PE_old$Eff.Dose, PE_old$Age10, "mean")
+plot(rad_by_age, type = "l", ylab = "Effective Dose", xlab = "Age Group", xaxt = "n",
+     main = "Mean Effective Dose by Age")
+points(rad_by_age)
+axis(1, at = 1:9, labels = age_cuts, cex.axis = .75)
+
+rad_by_bmi <- tapply(PE_old$Eff.Dose, PE_old$BMI10, "mean")
+plot(rad_by_bmi, type = "l", ylab = "Effective Dose", xlab = "BMI Group", xaxt = "n",
+     main = "Mean Effective Dose by BMI")
+points(rad_by_bmi)
+axis(1, at = 1:11, labels = BMI_cuts, cex.axis = .75)
+```
+
 
 
 

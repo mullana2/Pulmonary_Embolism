@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-library(readr)
+library(readxl)
 ## Read in the raw data files
 chest <- read_excel("Chest Only.xlsx")
 CTA <- read_excel("CTA.xlsx")
