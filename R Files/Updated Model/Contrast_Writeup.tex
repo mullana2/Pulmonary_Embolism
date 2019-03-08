@@ -92,7 +92,7 @@
 
 Using the original dataset to start, all patients that were recorded to
 have received more than 150cc of contrast were removed. This left us
-with 2365 patients total. Figure 1 shows the distribution of mean
+with 2328 patients total. Figure 1 shows the distribution of mean
 contrast administered by age group and BMI group. Here age is grouped by
 10-year intervals and BMI is grouped at 5-unit intervals.
 
@@ -168,6 +168,147 @@ From the model, these significant differences can be interpreted as:
 \item On average, patients who receive a CT using the DS scanner are administered 9.32cc less contrast than patients on the 128SSwIR scanner, 14.09cc less contrast than patients on the 64SSwIR scanner, and 15.07cc less contrast than patients on the 64SSwoIR scanner
 \item On average, patients who receive a CT using the 128SSwIR scanner are administered 4.77cc less contrast than patients on the 64SSwIR scanner and 5.75cc less contrast than patients on the 64SSwoIR scanner.
 \end{itemize}
+
+\subsection{Radiation and Age}\label{radiation-and-age}
+
+In earlier write-ups, we have seen a quadratic relationship between
+radiation administered and patient age. There appears to be a peak in
+effective dosage that occurs somewhere between 30 and 60 years of age.
+To better pinpoint exactly where this peak occurs, we can look at the
+average effective dose administered to patients grouped by age in 1-year
+intervals (Figure 3a). Here we still see the quadratic relationship, but
+there is a substantial amount of noise in the graph, which makes it
+rather difficult to identify the exact year at which effective dose
+reaches a maximum.
+
+To better determine the age at which the maximum radiation is
+administered, we can smooth this curve to get a better sense of the
+general pattern which will isolate the maximum effective dose. This
+smoothing process can be seen in Figures 3b. From this we get that the
+maximum average effective dose was administered to patients age 46.
+However, we can see that a more general range for the maximum radiation
+is for patients between 43 and 49.
+
+\includegraphics{Contrast_Writeup_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\newpage
+
+\subsection{Patient Population}\label{patient-population}
+
+Several descriptive statistics for the general patient population were
+requested for the papers that will be written about this data. I have
+included this information here.
+
+For the total patient population (Chest Only and CAP), there were 2713
+patients. This breaks down into 1278 male (47.1\%) and 1435 (52.9\%)
+female patients. For the chest only condition, there were a total of
+2328 patients. Out of these, 1093 (47.0\%) were male and 1235 (53./\%)
+were female.
+
+For the chest only patients, the range of DLP was 7.0 to 3072.0, with a
+mean of 393.7 and a median of 305.0.
+
+\subsection{Manuscript Results
+Section}\label{manuscript-results-section}
+
+This section is a direct re-write of the manuscript that I was sent for
+the effective dosage and contrast models, with the missing statistics
+filled in.
+
+\paragraph{Effective Dose Model}\label{effective-dose-model}
+
+There were 2369 total patients (mean age 58.1 years; age range 0.2-104.4
+years) with 1099 male patients (mean age 59.42; age range 0.2-96.5
+years) and 1243 female patients (mean age 56.9; age range 0.6-104.4
+years). The mean effective radiation dose was 5.512 mSv (median dose
+4.27 mSv; dose range 0.1-43.0 mSv). A linear regression model was used
+to determine which factors were significant indicators for the amount of
+radiation administered to a patient. Since the distribution of effective
+dose was right skewed, the linear model was fit to the log-transform of
+effective dose.
+
+The model found significant with patient's age group (\textless{}18
+years, 18-35 years, \textgreater{}35 years), BMI group (BMI under 20,
+between 20-40, above 40), gender, location of patient admittance, and
+type of scanner used for CTA. All post-hoc pairwise comparisons were
+then performed using Tukey's HSD with a FDR correction to compensate for
+the large number of factor levels being compared.
+
+Mean radiation dose for the under 18 age group was 3.18 mSv, which was
+significantly lower than the average dose for the 18-35 group (mean:
+5.24 mSv, p \textless{} .001) and over 35 group (mean: 5.57 mSv, p
+\textless{} .001). There was no significant difference between the 18-35
+and over 35 groups. Patient body habitus was a strong predictor for
+radiation dose with a mean dose of 3.21 mSv for the normal weight group
+{[}BMI \textless{}25{]}, which was significantly lower than the
+overweight group {[}BMI 25-40{]} (mean: 5.28 mSv, p \textless{} .001)
+and morbidly obese group {[}BMI \textgreater{}40{]} (mean: 10.25 mSv, p
+\textless{} .001). The mean radiation dose administered to the morbidly
+obese group was also significantly higher than the overweight group (p
+\textless{} .001).
+
+For the location at which the patient was admitted, intensive care unit
+(ICU) patients were associated with the highest radiation dose at an
+average of 6.16 mSv, compared to an average of 5.43 mSv for all other
+locations (p \textless{} .001). For the type of scanner used, the DS
+scanners had an average effective dose of 4.90 mSv, which was
+significantly lower than the 64SSwIR scanner (mean: 6.08 mSv, p
+\textless{} .001), 128SSwIR scanner (mean: 5.94 mSv, p \textless{}
+.001), and 64SSwoIR scanner (mean: 9.29 mSv, p \textless{} .001).
+Additionally, the 64SSwoIR scanner was associated with a significantly
+higher amount of radiation than all other scanners (p \textless{} .001
+for all). There was no difference in administered radiation between the
+64SSwIR and 128SSwIR scanners.
+
+\newpage
+
+\paragraph{Contrast Model}\label{contrast-model-1}
+
+Analysis of the amount of contrast administered to patients used the
+same patient base as in the effective dose study. The mean contrast dose
+was 88.48 mL (median dose 95.0 mL; dose range 5.0-150.0 mL). A linear
+regression model was used to determine which factors were significant
+indicators for the amount of radiation administered to a patient.
+
+The model found significant with patient's age group (\textless{}18
+years, 18-35 years, \textgreater{}35 years), BMI group (BMI under 20,
+between 20-40, above 40), gender, location of patient admittance, and
+type of scanner used for CTA. All post-hoc pairwise comparisons were
+then performed using Tukey's HSD with a FDR correction to compensate for
+the large number of factor levels being compared.
+
+Mean contrast dose for the under 18 age group was 65.67 mL, which was
+significantly lower than the average dose for the 18-35 group (mean:
+88.29 mL, p \textless{} .001) and over 35 group (mean: 88.74 mL, p
+\textless{} .001). There was no significant difference between the 18-35
+and over 35 groups. Patient body habitus was a strong predictor for the
+amount of contrast administered with a mean dose of 84.46 mL for the
+normal weight group {[}BMI \textless{}25{]}, which was significantly
+lower than the overweight group {[}BMI 25-40{]} (mean: 87.23 mL, p
+\textless{} .001) and morbidly obese group {[}BMI \textgreater{}40{]}
+(mean: 99.68 mL, p \textless{} .001). The mean radiation dose
+administered to the morbidly obese group was also significantly higher
+than the overweight group (p \textless{} .001).
+
+For the location at which the patient was admitted, intensive care unit
+(ICU) patients were associated with the highest contrast dose at an
+average of 90.58 mL, compared to an average of 88.21 mL for all other
+locations. Although this effect was found to be significant in the
+model, the difference was found to be only non-significant during
+post-hoc analysis with the FDR correction (p = .171). For the type of
+scanner used, the DS scanners had an average contrast dose of 83.45 mL,
+which was significantly lower than the 128SSwIR scanner (mean: 92.67 mL,
+p \textless{} .001), 64SSwIR scanner (mean: 98.47 mL, p \textless{}
+.001), and 64SSwoIR scanner (mean: 98.84 mL mSv, p \textless{} .001).
+Additionally, the 128SSwIR scanner was associated with a significantly
+lower amount of contrast than the 64SSwIR (p = .006). Only marginal
+significance was found for the difference between the 128SSwIR and
+64SSwoIR scanners (p = .064), and no difference was found between the
+64SSwIR and 64SSwoIR scanners.
+
+\paragraph{Other Details}\label{other-details}
+
+All analysis was conducted using R statistical software, version 3.5.0.
 
 
 \end{document}

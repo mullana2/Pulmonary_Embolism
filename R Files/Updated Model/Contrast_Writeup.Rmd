@@ -13,11 +13,11 @@ knitr::opts_chunk$set(echo = FALSE, fig.pos = 'htb!')
 
 ## Contrast Distributions
 
-Using the original dataset to start, all patients that were recorded to have received more than 150cc of contrast were removed. This left us with 2365 patients total. Figure 1 shows the distribution of mean contrast administered by age group and BMI group. Here age is grouped by 10-year intervals and BMI is grouped at 5-unit intervals.
+Using the original dataset to start, all patients that were recorded to have received more than 150cc of contrast were removed. This left us with 2328 patients total. Figure 1 shows the distribution of mean contrast administered by age group and BMI group. Here age is grouped by 10-year intervals and BMI is grouped at 5-unit intervals.
 
 ```{r, fig.height = 5, fig.width = 10}
 PE_raw <- read.csv("Data/1st_Set/PE_clean.csv")
-PE_short <- PE_raw[,c(4,5,7,8,9,10,11,12)]
+PE_short <- PE_raw[,c(4,5,6,7,8,9,10,11,12)]
 PE_chest <- subset(PE_short, subset = Procedure == "Chest Only")
 index <- which(PE_chest$Contrast.Given > 150)
 PE <- na.omit(PE_chest[-index,])
@@ -111,11 +111,67 @@ From the model, these significant differences can be interpreted as:
 
 ## Radiation and Age
 
-In earlier write-ups, we have seen a quadratic relationship between radiation administered and patient age. There appears to be a peak in effective dosage that occurs somewhere between 30 and 60 years of age. To better pinpoint exactly where this peak occurs, we first subset the data to patients between 25 and 65 years of age. We then create age groups at five-year intervals and retrieve the mean effective dose for each group. These results are given in Figure 3.
+In earlier write-ups, we have seen a quadratic relationship between radiation administered and patient age. There appears to be a peak in effective dosage that occurs somewhere between 30 and 60 years of age. To better pinpoint exactly where this peak occurs, we can look at the average effective dose administered to patients grouped by age in 1-year intervals (Figure 3a). Here we still see the quadratic relationship, but there is a substantial amount of noise in the graph, which makes it rather difficult to identify the exact year at which effective dose reaches a maximum. 
 
-```{r}
-PE_midage <- subset(PE, subset = Age > 25 & Age < 65)
-PE_midage$Age2 <- cut(PE_midage$Age, breaks = seq(25,65,5), labels = seq(30,65,5))
-rad_by_age2 <- tapply(PE_midage$Eff.Dose, PE_midage$Age2, "mean")
+To better determine the age at which the maximum radiation is administered, we can smooth this curve to get a better sense of the general pattern which will isolate the maximum effective dose. This smoothing process can be seen in Figures 3b. From this we get that the maximum average effective dose was administered to patients age 46. However, we can see that a more general range for the maximum radiation is for patients between 43 and 49.
+
+```{r, fig.height = 10, fig.width = 10}
+par(mfrow = c(2,2))
+PE$Age_Year <- cut(PE$Age, breaks = c(0,14:93,105), labels = c(1,15:93,105))
+rad_by_age <- tapply(PE$Eff.Dose, PE$Age_Year, "mean")
+plot(rad_by_age, type = "l", main = "Fig 3a: Mean Radiation by Age", xlab = "Age", xaxt = "n",
+     ylab = "Effective Dose", cex.main = 1)
+axis(1, at = c(1,seq(2,length(rad_by_age),5),length(rad_by_age)-1,length(rad_by_age)),
+     labels = c("<15",seq(15,90,5),"93",">93"), cex.axis = 0.8)
+
+rad_smooth <- loess(rad_by_age~c(1:length(rad_by_age)))
+max_rad <- which(predict(rad_smooth) == max(predict(rad_smooth)))
+plot(rad_by_age, type = "l", main = "Fig 3b: Mean Radiation by Age (Smooth)", xlab = "Age", xaxt = "n",
+     ylab = "Effective Dose", cex.main = 1)
+axis(1, at = c(1,seq(2,length(rad_by_age),5),length(rad_by_age)-1,length(rad_by_age)),
+     labels = c("<15",seq(15,90,5),"93",">93"), cex.axis = 0.8)
+lines(predict(rad_smooth), type = "l", lwd = "2")
+abline(v = max_rad, col = "red")
+abline(v = c(max_rad-3, max_rad+3), col = "red", lty = 2)
+legend("topright", legend = c("Age 46", "Age 44-48"), col = "red", lty = c(1,2))
 ```
 
+\newpage
+
+## Patient Population
+
+Several descriptive statistics for the general patient population were requested for the papers that will be written about this data. I have included this information here. 
+
+For the total patient population (Chest Only and CAP), there were 2713 patients. This breaks down into 1278 male (47.1\%)  and 1435 (52.9\%) female patients. For the chest only condition, there were a total of 2328 patients. Out of these, 1093 (47.0\%) were male and 1235 (53.\/%) were female.
+
+For the chest only patients, the range of DLP was 7.0 to 3072.0, with a mean of 393.7 and a median of 305.0.
+
+## Manuscript Results Section
+
+This section is a direct re-write of the manuscript that I was sent for the effective dosage and contrast models, with the missing statistics filled in. 
+
+#### Effective Dose Model
+
+There were 2369 total patients (mean age 58.1 years; age range 0.2-104.4 years) with 1099 male patients (mean age 59.42; age range 0.2-96.5 years) and 1243 female patients (mean age 56.9; age range 0.6-104.4 years). The mean effective radiation dose was  5.512 mSv (median dose 4.27 mSv; dose range 0.1-43.0 mSv). A linear regression model was used to determine which factors were significant indicators for the amount of radiation administered to a patient. Since the distribution of effective dose was right skewed, the linear model was fit to the log-transform of effective dose.
+
+The model found significant with patient's age group (<18 years, 18-35 years, >35 years), BMI group (BMI under 20, between 20-40, above 40), gender, location of patient admittance, and type of scanner used for CTA. All post-hoc pairwise comparisons were then performed using Tukey's HSD with a FDR correction to compensate for the large number of factor levels being compared.
+
+Mean radiation dose for the under 18 age group was 3.18 mSv, which was significantly lower than the average dose for the 18-35 group (mean: 5.24 mSv, p < .001) and over 35 group (mean: 5.57 mSv, p < .001). There was no significant difference between the 18-35 and over 35 groups. Patient body habitus was a strong predictor for radiation dose with a mean dose of 3.21 mSv for the normal weight group [BMI <25], which was significantly lower than the overweight group [BMI 25-40] (mean: 5.28 mSv, p < .001) and morbidly obese  group [BMI >40] (mean: 10.25 mSv, p < .001). The mean radiation dose administered to the morbidly obese group was also significantly higher than the overweight group (p < .001).
+
+For the location at which the patient was admitted, intensive care unit (ICU) patients were associated with the highest radiation dose at an average of 6.16 mSv, compared to an average of 5.43 mSv for all other locations (p < .001). For the type of scanner used, the DS scanners had an average effective dose of 4.90 mSv, which was significantly lower than the 64SSwIR scanner (mean: 6.08 mSv, p < .001), 128SSwIR scanner (mean: 5.94 mSv, p < .001), and 64SSwoIR scanner (mean: 9.29 mSv, p < .001). Additionally, the 64SSwoIR scanner was associated with a significantly higher amount of radiation than all other scanners (p < .001 for all). There was no difference in administered radiation between the 64SSwIR and 128SSwIR scanners.
+
+\newpage
+
+#### Contrast Model
+
+Analysis of the amount of contrast administered to patients used the same patient base as in the effective dose study. The mean contrast dose was 88.48 mL (median dose 95.0 mL; dose range 5.0-150.0 mL). A linear regression model was used to determine which factors were significant indicators for the amount of radiation administered to a patient.
+
+The model found significant with patient's age group (<18 years, 18-35 years, >35 years), BMI group (BMI under 20, between 20-40, above 40), gender, location of patient admittance, and type of scanner used for CTA. All post-hoc pairwise comparisons were then performed using Tukey's HSD with a FDR correction to compensate for the large number of factor levels being compared.
+
+Mean contrast dose for the under 18 age group was 65.67 mL, which was significantly lower than the average dose for the 18-35 group (mean: 88.29 mL, p < .001) and over 35 group (mean: 88.74 mL, p < .001). There was no significant difference between the 18-35 and over 35 groups. Patient body habitus was a strong predictor for the amount of contrast administered with a mean dose of 84.46 mL for the normal weight group [BMI <25], which was significantly lower than the overweight group [BMI 25-40] (mean: 87.23 mL, p < .001) and morbidly obese  group [BMI >40] (mean: 99.68 mL, p < .001). The mean radiation dose administered to the morbidly obese group was also significantly higher than the overweight group (p < .001).
+
+For the location at which the patient was admitted, intensive care unit (ICU) patients were associated with the highest contrast dose at an average of 90.58 mL, compared to an average of 88.21 mL for all other locations. Although this effect was found to be significant in the model, the difference was found to be only non-significant during post-hoc analysis with the FDR correction (p = .171). For the type of scanner used, the DS scanners had an average contrast dose of 83.45 mL, which was significantly lower than the 128SSwIR scanner (mean: 92.67 mL, p < .001), 64SSwIR scanner (mean: 98.47 mL, p < .001), and 64SSwoIR scanner (mean: 98.84 mL mSv, p < .001). Additionally, the 128SSwIR scanner was associated with a significantly lower amount of contrast than the 64SSwIR (p = .006). Only marginal significance was found for the difference between the 128SSwIR and 64SSwoIR scanners (p = .064), and no difference was found between the 64SSwIR and 64SSwoIR scanners.
+
+#### Other Details
+
+All analysis was conducted using R statistical software, version 3.5.0.
