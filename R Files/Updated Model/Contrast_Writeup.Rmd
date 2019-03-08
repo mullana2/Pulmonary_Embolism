@@ -1,0 +1,121 @@
+---
+title: "Contrast_Writeup"
+author: "Aidan Mullan"
+date: "3/7/2019"
+header-includes:
+  - \usepackage{float}
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.pos = 'htb!')
+```
+
+## Contrast Distributions
+
+Using the original dataset to start, all patients that were recorded to have received more than 150cc of contrast were removed. This left us with 2365 patients total. Figure 1 shows the distribution of mean contrast administered by age group and BMI group. Here age is grouped by 10-year intervals and BMI is grouped at 5-unit intervals.
+
+```{r, fig.height = 5, fig.width = 10}
+PE_raw <- read.csv("Data/1st_Set/PE_clean.csv")
+PE_short <- PE_raw[,c(4,5,7,8,9,10,11,12)]
+PE_chest <- subset(PE_short, subset = Procedure == "Chest Only")
+index <- which(PE_chest$Contrast.Given > 150)
+PE <- na.omit(PE_chest[-index,])
+
+age_cuts <- c("<20", "20-30", "30-40", "40-50","50-60", "60-70",
+              "70-80", "80-90", ">90")
+PE$Age10 <- cut(PE$Age, breaks = c(-1,seq(20,90,10), 110), labels = age_cuts)
+BMI_cuts <- c("10-15", "15-20", "20-25", "25-30","30-35", "35-40",
+              "40-45", "45-50", "50-55", ">55")
+PE$BMI10 <- cut(PE$BMI, breaks = c(seq(10,55,5),92), labels = BMI_cuts)
+
+par(mfrow = c(1,2))
+contrast_by_age <- tapply(PE$Contrast.Given, PE$Age10, "mean")
+plot(contrast_by_age, type = "l", ylab = "Contrast Given", xlab = "Age Group", xaxt = "n",
+     main = "Figure 1b: Mean Contrast Administered by Age", cex.main = 1, yaxt = "n", ylim = c(70,95))
+points(contrast_by_age)
+axis(1, at = 1:9, labels = age_cuts, cex.axis = .7, mgp = c(3,0.5,0))
+axis(2, at = seq(70,95,5))
+
+contrast_by_bmi <- tapply(PE$Contrast.Given, PE$BMI10, "mean")
+plot(contrast_by_bmi, type = "l", ylab = "Contrast Given", xlab = "BMI Group", xaxt = "n",
+     main = "Figure 1b: Mean Contrast Administered by BMI", cex.main = 1, yaxt = "n")
+points(contrast_by_bmi)
+axis(1, at = 1:10, labels = BMI_cuts, cex.axis = .7, mgp = c(3,0.5,0))
+axis(2, at = seq(70,120,10))
+par(mfrow = c(1,1))
+```
+
+Here we see a somewhat quadratic relationship between Age and contrast, which is similar to what we saw for the distribution of radiation administered. We also have a linear association between BMI and contrast, with the amount of contrast being administered to a patient increasing as the patient's BMI increases.
+
+One question that arises is why do we see a quadratic relationship between Age and Contrast? It may be due to some quadratic relationship between age and BMI, where young and old patients tend to weigh less than patients between 30 and 60. Figure 2 overlays the relationship between age and BMI onto the relationship between age and contrast so that we can compare. 
+
+In this graph we do see similar relationships with age for BMI and contrast, which seems to support our theory that there is a quadratic relationship between patient age and BMI that can explain the quadratic nature of the relationship between patient age and the amound of contrast administered prior to the CT scan.
+
+```{r, fig.height = 5, fig.width = 8}
+par(mar = c(5,5,3,5))
+bmi_by_age <- tapply(PE$BMI, PE$Age10, "mean")
+plot(contrast_by_age, type = "l", ylab = "Contrast Given", xlab = "Age Group", xaxt = "n",
+     main = "Figure 2: Mean BMI and Contrast Administered by Age", cex.main = 1, yaxt = "n", ylim = c(70,95))
+points(contrast_by_age)
+axis(1, at = 1:9, labels = age_cuts, cex.axis = .7, mgp = c(3,0.5,0))
+axis(2, at = seq(70,95,5))
+par(new = T)
+plot(bmi_by_age, type = "l", axes = F, lty = 2, xlab = NA, ylab = NA, col = "red")
+points(bmi_by_age, col = "red", pch = 16)
+axis(side = 4)
+mtext(side = 4, line = 3, "BMI")
+legend("topright", legend = c("Contrast", "BMI"), lty = c(1,2), col = c("black", "red"))
+```
+
+
+
+## Contrast Model
+
+ Then, a linear model was fit for contrast considering age (<18, 18-35, >35), BMI (<20, 20-40, >40), Gender, Location of Admission, and Type of CT scanner used. Model coefficients are given in Table 1. 
+
+\begin{table}[H] \centering 
+  \caption{Positivity Model Coefficients} 
+\begin{tabular}{p{3cm}|p{3cm}p{3cm}p{3cm}}
+\\[-1.8ex] \hline 
+\hline
+ & Estimate & Std. Error & p  \\
+\hline \\[-1.8ex] 
+ Intercept   & 67.332 & 3.490 & <.001 $***$ \\
+ BMI 25-40   & 2.847 & 0.742 & <.001 $***$\\
+ BMI $>$40   & 16.443 & 1.004 & <.001 $***$\\
+ Loc: ICU    & 2.480 & 1.046 & .018 $*$\\
+ Loc: IN     & 0.821 & 0.807 & .309 \\
+ Loc: OUT    & 2.988 & 1.292 & .021 $.$\\
+ CT: 64SSwIR & 4.771 & 1.647 & .004 $**$\\
+ CT: 64SSWoIR & 5.752 & 2.143 & .004 $**$ \\
+ CT: DS Scanner & $-$9.316 & 0.676 & <.001 $***$\\
+ Age: 18-35 & 19.476 & 3.521 & <.001 $***$\\
+ Age: $>$35 & 18.577 & 3.411 & <.001 $***$ \\
+ Gender: Male & 4.162 & 0.648 & <.001 $***$ \\
+\hline 
+\hline \\[-1.8ex]
+\multicolumn{4}{l}{\textit{Note:} Significance: $.$ < .1, $*$ <.05, $**$ < .01, $***$ < .001}
+ \end{tabular}
+\end{table}
+
+#### Influence of Scanner Type
+
+Our contrast model found a significant effect for the type of scanner used. Post-hoc comparisons conducted using Tukey's HSD found that the DS scanners were associated with significantly lower levels of contrast than all 3 other scanners ($p<.001$ for all 3). Additionally, the 64SSwIR and 64SSwoIR scanners had significantly higher levels of contrast than the 128SSwIR scanner (64SSwIR: $p = .001$; 64SSwoIR: $p = .016$). There was no significant difference in contrast usage between the 64SSwIR and 64SSwoIR scanners.
+
+From the model, these significant differences can be interpreted as:
+\begin{itemize}
+\item On average, patients who receive a CT using the DS scanner are administered 9.32cc less contrast than patients on the 128SSwIR scanner, 14.09cc less contrast than patients on the 64SSwIR scanner, and 15.07cc less contrast than patients on the 64SSwoIR scanner
+\item On average, patients who receive a CT using the 128SSwIR scanner are administered 4.77cc less contrast than patients on the 64SSwIR scanner and 5.75cc less contrast than patients on the 64SSwoIR scanner.
+\end{itemize}
+
+## Radiation and Age
+
+In earlier write-ups, we have seen a quadratic relationship between radiation administered and patient age. There appears to be a peak in effective dosage that occurs somewhere between 30 and 60 years of age. To better pinpoint exactly where this peak occurs, we first subset the data to patients between 25 and 65 years of age. We then create age groups at five-year intervals and retrieve the mean effective dose for each group. These results are given in Figure 3.
+
+```{r}
+PE_midage <- subset(PE, subset = Age > 25 & Age < 65)
+PE_midage$Age2 <- cut(PE_midage$Age, breaks = seq(25,65,5), labels = seq(30,65,5))
+rad_by_age2 <- tapply(PE_midage$Eff.Dose, PE_midage$Age2, "mean")
+```
+
