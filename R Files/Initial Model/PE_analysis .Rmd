@@ -71,8 +71,8 @@ aggregate(Contrast.Given~CT.Type, data = PE_old, FUN = "sd")
 ## Summ Stats for Rate of PE
 #####-------------------
 
-PE$PE.Num <- ifelse(PE$Pulmonary.Embolism == "NO", 0, 1)
-mean(PE$PE.Num)
+PE_old$PE.Num <- ifelse(PE_old$Pulmonary.Embolism == "NO", 0, 1)
+mean(PE_old$PE.Num)
 
 ## Positivity by Procedure Type
 aggregate(PE.Num~Procedure, data = PE_old, FUN = "mean")

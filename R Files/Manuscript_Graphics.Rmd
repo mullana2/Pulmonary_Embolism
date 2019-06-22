@@ -1,0 +1,53 @@
+---
+title: "Manuscript_Graphics"
+author: "Aidan Mullan"
+date: "6/22/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+PE_oldraw <- read.csv("Data/1st_Set/PE_clean.csv")
+PE_old <- na.omit(subset(PE_oldraw[,c(3,4,5,7:13,16,17)], subset = Procedure == "Chest Only"))
+```
+
+```{r}
+## Line Plot of Model Predictions
+location <- c("ED", "ED", "ED", "ICU", "ICU", "ICU", "IN", "IN", "IN", "OUT", "OUT", "OUT")
+color <- c(rep("grey89", 3), rep("grey69", 3), rep("grey49", 3), rep("grey29", 3))
+BMI <- rep(c("<25", "25-40", ">40"), 4)
+mod_probs <- c(.082, .107, .091, .133, .171, .146, .107, .139, .118, .072, .094, .079)
+probs <- data.frame(Location = location, bmi = BMI, probs = mod_probs, color = color)
+
+pos_preds <- ggplot(probs, aes(x = bmi, y = probs, group = Location, color = Location)) +
+                geom_line(size = .75) + geom_point(size = 1.5) +
+                scale_colour_manual(values = c("lightblue", "dodgerblue", "mediumblue", "navyblue")) + 
+                xlab("BMI Group") + ylab("Probability of Positive Scan") + 
+                ggtitle("Predicted CT Positivity by BMI and Admittance Location")
+
+ggsave(filename = "Images/PositivityPreds.jpeg", plot = pos_preds,
+       width = 7, height = 5, device = "jpeg")
+
+## Patient Age and BMI Demographics
+counts <- as.data.frame(table(PE_oldraw$Age_range, PE_oldraw$BMI_range))
+names(counts) <- c("Age", "BMI", "n")
+counts$Age <- factor(counts$Age, levels = c("<18", "18-35", ">35"))
+counts$BMI <- factor(counts$BMI, levels = c("<25", "25-40", ">40"))
+
+age_bmi <- ggplot(counts, aes(fill = BMI, x = Age, y = n)) + 
+              geom_bar(position = "dodge", stat = "identity") +
+              scale_fill_manual(values = c("lightblue", "dodgerblue", "navyblue")) +
+              scale_y_continuous(breaks = seq(0,1500,250)) + 
+              ylab("Number of Patients") + 
+              ggtitle("Patient Population by Age and BMI Group")
+
+ggsave(filename = "Images/AgeBMI.jpeg", plot = age_bmi,
+       width = 7, height = 5, device = "jpeg")
+
+```
+
