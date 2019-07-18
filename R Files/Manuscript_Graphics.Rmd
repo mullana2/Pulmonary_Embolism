@@ -70,11 +70,14 @@ bar_PosAge <- ggplot(Pos_Age, aes(fill = Age_range, x = Age_range, y = Positivit
 
 Pos_BMI <- PE_old %>% group_by(BMI_range) %>% summarise(n = n(), Positivity = mean(Positivity))
 Pos_BMI$Positivity <- round(Pos_BMI$Positivity, 3)
+Pos_BMI$Signif <- c("*", "", "*")
 Pos_BMI$BMI_range <- factor(Pos_BMI$BMI_range, levels = c("<25", "25-40", ">40"))
 bar_PosBMI <- ggplot(Pos_BMI, aes(fill = BMI_range, x = BMI_range, y = Positivity, label = Positivity)) + 
                      ylim(0,0.25) +
                      geom_bar(position = "dodge", stat = "identity", width = 0.5) +
                      geom_text(size = 3, position = position_dodge(0.9), vjust = -1) +
+                     geom_text(aes(label = Signif), size = 5, position = position_dodge(0.9),
+                               vjust = -1.5) +
                      scale_fill_manual(values = c("lightblue", "dodgerblue", "navyblue")) +
                      ylab("Pulmonary Embolism Positivity Rate") + 
                      xlab("BMI Group") +
@@ -93,12 +96,15 @@ ggsave(filename = "Images/Bar_PosBMI.jpeg", plot = bar_PosBMI,
 Pos_AgeGender <- PE_old %>% group_by(Age_range, Gender) %>% summarise(n = n(),
                                                                       Positivity = mean(Positivity))
 Pos_AgeGender$Positivity <- round(Pos_AgeGender$Positivity, 3)
+Pos_AgeGender$Signif <- c("","","","","*","*")
 Pos_AgeGender$Age_range <- factor(Pos_AgeGender$Age_range, levels = c("<18", "18-35", ">35"))
 bar_PosAgeGender <- ggplot(Pos_AgeGender, aes(fill = Gender, x = Age_range,
                                                y = Positivity, label = Positivity)) +
                      ylim(0,0.25) +
                      geom_bar(position = "dodge", stat = "identity") +
                      geom_text(size = 3, position = position_dodge(0.9), vjust = -1) +
+                     geom_text(aes(label = Signif), size = 5, position = position_dodge(0.9),
+                               vjust = -1.5) +
                      scale_fill_manual(values = c("lightblue", "navyblue")) +
                      ylab("Pulmonary Embolism Positivity Rate") + 
                      xlab("Age Group") +
@@ -138,7 +144,7 @@ bar_PosBMILocation <- ggplot(Pos_BMILocation, aes(fill = Location, x = BMI_range
                      scale_fill_manual(values = c("lightblue", "dodgerblue", "mediumblue", "navyblue")) +
                      ylab("Pulmonary Embolism Positivity Rate") + 
                      xlab("BMI Group") +
-                     ggtitle("Pulmonary Embolism Positivity Rate by BMI and Gender ")
+                     ggtitle("Pulmonary Embolism Positivity Rate by BMI and Location")
                      
 ggsave(filename = "Images/Bar_PosBMILocation.jpeg", plot = bar_PosBMILocation,
        width = 7, height = 5, device = "jpeg")
@@ -153,7 +159,7 @@ bar_PosLocationBMI <- ggplot(Pos_BMILocation, aes(fill = BMI_range, x = Location
                      ylab("Pulmonary Embolism Positivity Rate") + 
                      xlab("BMI Group") +
                      labs(fill = "BMI Group") +
-                     ggtitle("Pulmonary Embolism Positivity Rate by BMI and Gender ")
+                     ggtitle("Pulmonary Embolism Positivity Rate by BMI and Location")
 
 ggsave(filename = "Images/Bar_PosLocationBMI.jpeg", plot = bar_PosLocationBMI,
        width = 7, height = 5, device = "jpeg")
@@ -256,7 +262,8 @@ ggsave(filename = "Images/pie_NumLocation.jpeg", plot = pie_NumLocation,
 location <- c("ED", "ED", "ED", "ICU", "ICU", "ICU", "IN", "IN", "IN", "OUT", "OUT", "OUT")
 BMI <- rep(c("<25", "25-40", ">40"), 4)
 mod_probs <- c(.082, .107, .091, .133, .171, .146, .107, .139, .118, .072, .094, .079)
-probs <- data.frame(Location = location, bmi = BMI, probs = mod_probs, color = color)
+probs <- data.frame(Location = location, bmi = BMI, probs = mod_probs)
+probs$bmi <- factor(probs$bmi, levels = c("<25", "25-40", ">40"))
 
 line_PosPreds <- ggplot(probs, aes(x = bmi, y = probs, group = Location, color = Location)) +
                 geom_line(size = .75) + geom_point(size = 1.5) +
@@ -276,7 +283,46 @@ ggsave(filename = "Images/Line_PosPreds.jpeg", plot = line_PosPreds,
        width = 7, height = 5, device = "jpeg")
 ggsave(filename = "Images/Line_Labels_PosPreds.jpeg", plot = line_labels_PosPreds,
        width = 7, height = 5, device = "jpeg")
+
+Pos_Loc <- PE_old %>% group_by(Location) %>% summarise(n = n(), Positivity = mean(Positivity))
+Pos_Loc$Positivity <- round(Pos_Loc$Positivity, 3)
+Pos_Loc$Signif1 <- c("*", "**", "*", "**")
+Pos_Loc$Signif2 <- c("***", "***", "", "")
+bar_PosLoc <- ggplot(Pos_Loc, aes(fill = Location, x = Location, y = Positivity, label = Positivity)) +
+                     ylim(0,0.25) +
+                     geom_bar(position = "dodge", stat = "identity", width = 0.5) +
+                     geom_text(size = 3, position = position_dodge(0.9), vjust = -1) +
+                     geom_text(aes(label = Signif1), size = 5, position = position_dodge(0.9), 
+                               vjust = -1.5) +
+                     geom_text(aes(label = Signif2), size = 5, position = position_dodge(0.9),
+                               vjust = -2.5) +
+                     scale_fill_manual(values = c("lightblue", "dodgerblue", "mediumblue" ,"navyblue")) +
+                     ylab("Pulmonary Embolism Positivity Rate") + 
+                     xlab("Location") +
+                     labs(fill = "Location") +
+                     theme(legend.position = "none") +
+                     ggtitle("Pulmonary Embolism Positivity Rate by Location")
+
+ggsave(filename = "Images/Bar_PosLocation.jpeg", plot = bar_PosLoc,
+       width = 7, height = 5, device = "jpeg")
+
+p1 <- .122; p2 <- .098; n1 <- 1097; n2 <- 1235
+pp <- (p1*n1 + p2*n2) / (n1 + n2)
+z <- (p1-p2)/(sqrt(pp*(1-pp)*(1/n1 + 1/n2)))
+1-pnorm(z)
 ```
+
+
+## Fix BMI graph
+## Gender positivity (M = .122, F = .098)
+## Gender X Age significance, add asterisks
+--- 18-35 M v. 18-35 F p = .0295, no other significance
+## BMI significance + p-value (chi-square), add asterisks
+--- 25-40 higher than <25, p = .024
+## Positivity by location, add asterisks, provide caption with p-values
+--- ICU > OUT/ED p < .01, IN > ED p = .026
+## Fix title of bmi + location
+## Give caption for BMI scatterplot
 
 
 
