@@ -13,11 +13,12 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(tidyverse)
 PE_oldraw <- read.csv("Data/1st_Set/PE_clean.csv")
-PE_old <- na.omit(subset(PE_oldraw[,c(3,4,5,7:13,16,17)], subset = Procedure == "Chest Only"))
+PE_old <- PE_oldraw[,c(3,4,5,7:13,16,17)]
+PE_old$Positivity <- if_else(PE_old$Pulmonary.Embolism == "YES", 1, 0)
+PE_old2 <- subset(PE_old, !is.na(PE_old$BMI))
 ```
 
 ```{r}
-
 ## Patient Age and BMI Demographics
 counts <- as.data.frame(table(PE_oldraw$Age_range, PE_oldraw$BMI_range))
 names(counts) <- c("Age", "BMI", "n")
@@ -50,8 +51,6 @@ ggsave(filename = "Images/Bar_AgeBMI.jpeg", plot = bar_AgeBMI,
 ## Observed Bar Plots
 #####--------------------
 
-PE_old$Positivity <- if_else(PE_old$Pulmonary.Embolism == "YES", 1, 0)
-
 ## Positivity X age, bmi
 
 Pos_Age <- PE_old %>% group_by(Age_range) %>% summarise(n = n(), Positivity = mean(Positivity))
@@ -68,7 +67,7 @@ bar_PosAge <- ggplot(Pos_Age, aes(fill = Age_range, x = Age_range, y = Positivit
                      theme(legend.position = "none") +
                      ggtitle("Pulmonary Embolism Positivity Rate by Age")
 
-Pos_BMI <- PE_old %>% group_by(BMI_range) %>% summarise(n = n(), Positivity = mean(Positivity))
+Pos_BMI <- PE_old2 %>% group_by(BMI_range) %>% summarise(n = n(), Positivity = mean(Positivity))
 Pos_BMI$Positivity <- round(Pos_BMI$Positivity, 3)
 Pos_BMI$Signif <- c("*", "", "*")
 Pos_BMI$BMI_range <- factor(Pos_BMI$BMI_range, levels = c("<25", "25-40", ">40"))
@@ -132,7 +131,7 @@ ggsave(filename = "Images/Bar_PosBMIGender.jpeg", plot = bar_PosBMIGender,
 #####-----------------------
 ## Positivity X location+bmi
 
-Pos_BMILocation <- PE_old %>% group_by(BMI_range, Location) %>% summarise(n = n(),
+Pos_BMILocation <- PE_old2 %>% group_by(BMI_range, Location) %>% summarise(n = n(),
                                                                       Positivity = mean(Positivity))
 Pos_BMILocation$Positivity <- round(Pos_BMILocation$Positivity, 3)
 Pos_BMILocation$BMI_range <- factor(Pos_BMI$BMI_range, levels = c("<25", "25-40", ">40"))
@@ -284,7 +283,8 @@ ggsave(filename = "Images/Line_PosPreds.jpeg", plot = line_PosPreds,
 ggsave(filename = "Images/Line_Labels_PosPreds.jpeg", plot = line_labels_PosPreds,
        width = 7, height = 5, device = "jpeg")
 
-Pos_Loc <- PE_old %>% group_by(Location) %>% summarise(n = n(), Positivity = mean(Positivity))
+Pos_Loc <- PE_old %>% group_by(Location) %>% summarise(n = n(), Positivity = mean(Positivity),
+                                                       Cases = sum(Positivity))
 Pos_Loc$Positivity <- round(Pos_Loc$Positivity, 3)
 Pos_Loc$Signif1 <- c("*", "**", "*", "**")
 Pos_Loc$Signif2 <- c("***", "***", "", "")
@@ -292,10 +292,10 @@ bar_PosLoc <- ggplot(Pos_Loc, aes(fill = Location, x = Location, y = Positivity,
                      ylim(0,0.25) +
                      geom_bar(position = "dodge", stat = "identity", width = 0.5) +
                      geom_text(size = 3, position = position_dodge(0.9), vjust = -1) +
-                     geom_text(aes(label = Signif1), size = 5, position = position_dodge(0.9), 
-                               vjust = -1.5) +
-                     geom_text(aes(label = Signif2), size = 5, position = position_dodge(0.9),
-                               vjust = -2.5) +
+                     #geom_text(aes(label = Signif1), size = 5, position = position_dodge(0.9), 
+                               #vjust = -1.5) +
+                     #geom_text(aes(label = Signif2), size = 5, position = position_dodge(0.9),
+                               #vjust = -2.5) +
                      scale_fill_manual(values = c("lightblue", "dodgerblue", "mediumblue" ,"navyblue")) +
                      ylab("Pulmonary Embolism Positivity Rate") + 
                      xlab("Location") +
@@ -306,7 +306,7 @@ bar_PosLoc <- ggplot(Pos_Loc, aes(fill = Location, x = Location, y = Positivity,
 ggsave(filename = "Images/Bar_PosLocation.jpeg", plot = bar_PosLoc,
        width = 7, height = 5, device = "jpeg")
 
-p1 <- .122; p2 <- .098; n1 <- 1097; n2 <- 1235
+p1 <- .187; p2 <- .079; n1 <- 107; n2 <- 202
 pp <- (p1*n1 + p2*n2) / (n1 + n2)
 z <- (p1-p2)/(sqrt(pp*(1-pp)*(1/n1 + 1/n2)))
 1-pnorm(z)
