@@ -313,16 +313,5 @@ z <- (p1-p2)/(sqrt(pp*(1-pp)*(1/n1 + 1/n2)))
 ```
 
 
-## Fix BMI graph
-## Gender positivity (M = .122, F = .098)
-## Gender X Age significance, add asterisks
---- 18-35 M v. 18-35 F p = .0295, no other significance
-## BMI significance + p-value (chi-square), add asterisks
---- 25-40 higher than <25, p = .024
-## Positivity by location, add asterisks, provide caption with p-values
---- ICU > OUT/ED p < .01, IN > ED p = .026
-## Fix title of bmi + location
-## Give caption for BMI scatterplot
-
 
 
