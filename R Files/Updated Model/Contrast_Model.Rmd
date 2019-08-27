@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 PE_raw <- read.csv("Data/1st_Set/PE_clean.csv")
-PE_short <- PE_raw[,c(4,5,8,9,10,11,12)]
+PE_short <- PE_raw[,c(4,5,7,8,9,10,11,12)]
 PE_chest <- subset(PE_short, subset = Procedure == "Chest Only")
 
 index <- which(PE_chest$Contrast.Given > 150)
@@ -30,7 +30,7 @@ summary(contrast2)
 anova(contrast1, contrast2) # p = .026, prefer full model
 
 contrast.aov <- aov(Contrast.Given~CT.Type+BMI_range+Age_range+Gender+Location, data = PE)
-TukeyHSD(contrast.aov, which = "CT.Type")
+TukeyHSD(contrast.aov)
 ```
 
 

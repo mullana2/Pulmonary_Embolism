@@ -21,7 +21,14 @@ PE <- read.csv("Data/Updates/PE_update_clean.csv")[,-1]
 ## Patient Age and BMI Demographics
 PE$Age_range <- cut(PE$Age, breaks = c(0,18,35,110), labels = c("<18", "18-35", ">35"))
 PE$BMI_range <- cut(PE$BMI, breaks = c(0,25,40,100), labels = c("<25", "25-40", ">40"))
+
 PE$CT.Type <- factor(PE$CT.Type, levels = c("64SSWoIR", "64SSWithIR", "128SSwIR", "DS_Scanner"))
+PE$CT.Type2 <- ifelse(PE$CT.Type == "64SSWoIR", "64SSwFBP",
+                     ifelse(PE$CT.Type == "64SSWithIR", "64SSwSAFIRE",
+                            ifelse(PE$CT.Type == "128SSwIR", "128SSwSAFIRE", 
+                                   ifelse(PE$CT.Type == "DS_Scanner", "DSwADMIRE", NA))))
+PE$CT.Type2 <- factor(PE$CT.Type2, levels = c("64SSwFBP", "64SSwSAFIRE", "128SSwSAFIRE", "DSwADMIRE"))
+
 counts <- as.data.frame(table(PE$Age_range, PE$BMI_range))
 names(counts) <- c("Age", "BMI", "n")
 counts$Age <- factor(counts$Age, levels = c("<18", "18-35", ">35"))
@@ -77,10 +84,10 @@ bar_NumLocation <- ggplot(Location, aes(fill = Location, x = Location,
 ggsave(filename = "EffDose_Contrast_Manuscript/Images/Patient_Counts/Bar_Location.jpeg",
        plot = bar_NumLocation, width = 7, height = 5, device = "jpeg")
 
-Scanner <- PE %>% group_by(CT.Type) %>% summarise(n = n(), Radiation = mean(Contrast.Given),
+Scanner <- PE %>% group_by(CT.Type2) %>% summarise(n = n(), Radiation = mean(Contrast.Given),
                                                     Contrast = mean(Contrast.Given))
 
-bar_NumScanner <- ggplot(Scanner, aes(fill = CT.Type, x = CT.Type,
+bar_NumScanner <- ggplot(Scanner, aes(fill = CT.Type2, x = CT.Type2,
                                        y = n, label = n)) +
                      geom_bar(position = "dodge", stat = "identity", width = 0.5) +
                      geom_text(size = 3, position = position_dodge(0.5), vjust = -1) +
@@ -88,6 +95,7 @@ bar_NumScanner <- ggplot(Scanner, aes(fill = CT.Type, x = CT.Type,
                      ylab("Number of Patients") + 
                      xlab("Scanner Type") +
                      #labs(fill = "Age Group") +
+                     theme(legend.position = "none") +
                      ggtitle("Number of Patients by Type of Scanner Used")
 
 ggsave(filename = "EffDose_Contrast_Manuscript/Images/Patient_Counts/Bar_Scanner.jpeg",
@@ -136,7 +144,7 @@ ggsave(filename = "EffDose_Contrast_Manuscript/Images/Eff_Dose/Scat_BMIED.jpeg",
 ggsave(filename = "EffDose_Contrast_Manuscript/Images/Eff_Dose/Scat_combo.jpeg",
        plot = grid.arrange(scat_AgeED, scat_BMIED), width = 7, height = 7, device = "jpeg")
 
-box_ScannerED <- ggplot(PE, aes(x = CT.Type, y = Contrast.Given, fill = CT.Type)) +
+box_ScannerED <- ggplot(PE, aes(x = CT.Type2, y = Eff.Dose, fill = CT.Type)) +
                 geom_boxplot() +
                 scale_fill_manual(values = c("lightblue", "dodgerblue" ,"mediumblue" ,"navyblue")) +
                 ylab("Effective Dose (mSv)") + 
@@ -144,7 +152,7 @@ box_ScannerED <- ggplot(PE, aes(x = CT.Type, y = Contrast.Given, fill = CT.Type)
                 theme(legend.position = "none") +
                 ggtitle("Effective Dose Administered by Location of Admittance")
 
-box_Gender <- ggplot(PE, aes(x = Gender, y = Contrast.Given, fill = Gender)) +
+box_Gender <- ggplot(PE, aes(x = Gender, y = Eff.Dose, fill = Gender)) +
                 geom_boxplot() +
                 scale_fill_manual(values = c("lightblue","dodgerblue")) +
                 ylab("Effective Dose (mSv)") + 
@@ -152,21 +160,29 @@ box_Gender <- ggplot(PE, aes(x = Gender, y = Contrast.Given, fill = Gender)) +
                 theme(legend.position = "none") +
                 ggtitle("Effective Dose Administered by Patient Gender")
 
-box_Age <- ggplot(PE, aes(x = Age_range, y = Contrast.Given, fill = Age_range)) +
+box_Age <- ggplot(PE, aes(x = Age_range, y = Eff.Dose, fill = Age_range)) +
                 geom_boxplot() +
                 scale_fill_manual(values = c("lightblue","dodgerblue", "mediumblue")) +
                 ylab("Effective Dose (mSv)") + 
-                xlab("Patient Gender") +
+                xlab("Patient Age") +
                 theme(legend.position = "none") +
-                ggtitle("Effective Dose Administered by Patient Gender")
+                ggtitle("Effective Dose Administered by Patient Age Group")
 
-box_BMI <- ggplot(PE, aes(x = BMI_range, y = Contrast.Given, fill = BMI_range)) +
+box_BMI <- ggplot(PE, aes(x = BMI_range, y = Eff.Dose, fill = BMI_range)) +
                 geom_boxplot() +
                 scale_fill_manual(values = c("lightblue","dodgerblue", "mediumblue")) +
                 ylab("Effective Dose (mSv)") + 
-                xlab("Patient Gender") +
+                xlab("Patient BMI") +
                 theme(legend.position = "none") +
-                ggtitle("Effective Dose Administered by Patient Gender")
+                ggtitle("Effective Dose Administered by Patient BMI Group")
+
+box_LocationED <- ggplot(PE, aes(x = Location, y = Eff.Dose, fill = Location)) +
+                geom_boxplot() +
+                scale_fill_manual(values = c("lightblue","dodgerblue", "mediumblue", "navyblue")) +
+                ylab("Effective Dose (mSv)") + 
+                xlab("Patient Location") +
+                theme(legend.position = "none") +
+                ggtitle("Effective Dose Administered by Patient Location")
 
 ggsave(filename = "EffDose_Contrast_Manuscript/Images/Eff_Dose/Box_Scanner.jpeg",
        plot = box_ScannerED, width = 7, height = 5, device = "jpeg")
@@ -176,6 +192,8 @@ ggsave(filename = "EffDose_Contrast_Manuscript/Images/Eff_Dose/Box_Age.jpeg",
        plot = box_Age, width = 7, height = 5, device = "jpeg")
 ggsave(filename = "EffDose_Contrast_Manuscript/Images/Eff_Dose/Box_BMI.jpeg",
        plot = box_BMI, width = 7, height = 5, device = "jpeg")
+ggsave(filename = "EffDose_Contrast_Manuscript/Images/Eff_Dose/Box_LocationED.jpeg",
+       plot = box_LocationED, width = 7, height = 5, device = "jpeg")
 ```
 
 ```{r}
@@ -228,7 +246,7 @@ box_ScannerContrast <- ggplot(PE, aes(x = CT.Type, y = Contrast.Given, fill = CT
                 theme(legend.position = "none") +
                 ggtitle("Contrast Administered by Type of Scanner Used")
 
-box_Location <- ggplot(PE, aes(x = Location, y = Contrast.Given, fill = Location)) +
+box_LocationContrast <- ggplot(PE, aes(x = Location, y = Contrast.Given, fill = Location)) +
                 geom_boxplot() +
                 scale_fill_manual(values = c("lightblue","dodgerblue", "mediumblue", "navyblue")) +
                 ylab("Contrast (mL)") + 
@@ -236,11 +254,41 @@ box_Location <- ggplot(PE, aes(x = Location, y = Contrast.Given, fill = Location
                 theme(legend.position = "none") +
                 ggtitle("Contrast Administered by Patient Location of Admittance")
 
+box_GenderContrast <- ggplot(PE, aes(x = Gender, y = Contrast.Given, fill = Gender)) +
+                geom_boxplot() +
+                scale_fill_manual(values = c("lightblue","dodgerblue")) +
+                ylab("Contrast (mL)") + 
+                xlab("Patient Gender") +
+                theme(legend.position = "none") +
+                ggtitle("Contrast Administered by Patient Gender")
+
+box_AgeContrast <- ggplot(PE, aes(x = Age_range, y = Contrast.Given, fill = Age_range)) +
+                geom_boxplot() +
+                scale_fill_manual(values = c("lightblue","dodgerblue", "mediumblue")) +
+                ylab("Contrast (mL)") + 
+                xlab("Patient Age") +
+                theme(legend.position = "none") +
+                ggtitle("Contrast Administered by Patient Age Group")
+
+box_BMIContrast <- ggplot(PE, aes(x = BMI_range, y = Contrast.Given, fill = BMI_range)) +
+                geom_boxplot() +
+                scale_fill_manual(values = c("lightblue","dodgerblue", "mediumblue")) +
+                ylab("Contrast (mL)") + 
+                xlab("Patient BMI") +
+                theme(legend.position = "none") +
+                ggtitle("Contrast Administered by Patient BMI Group")
+
 
 ggsave(filename = "EffDose_Contrast_Manuscript/Images/Contrast/Box_Scanner.jpeg",
        plot = box_ScannerContrast, width = 7, height = 5, device = "jpeg")
 ggsave(filename = "EffDose_Contrast_Manuscript/Images/Contrast/Box_Location.jpeg",
-       plot = box_Location, width = 7, height = 5, device = "jpeg")
+       plot = box_LocationContrast, width = 7, height = 5, device = "jpeg")
+ggsave(filename = "EffDose_Contrast_Manuscript/Images/Contrast/Box_Gender.jpeg",
+       plot = box_GenderContrast, width = 7, height = 5, device = "jpeg")
+ggsave(filename = "EffDose_Contrast_Manuscript/Images/Contrast/Box_Age.jpeg",
+       plot = box_AgeContrast, width = 7, height = 5, device = "jpeg")
+ggsave(filename = "EffDose_Contrast_Manuscript/Images/Contrast/Box_BMI.jpeg",
+       plot = box_BMIContrast, width = 7, height = 5, device = "jpeg")
 
 ```
 
