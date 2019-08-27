@@ -238,7 +238,7 @@ ggsave(filename = "EffDose_Contrast_Manuscript/Images/Contrast/Scat_BMIContrast.
 ggsave(filename = "EffDose_Contrast_Manuscript/Images/Contrast/Scat_combo.jpeg",
        plot = grid.arrange(scat_AgeContrast, scat_BMIContrast), width = 7, height = 7, device = "jpeg")
 
-box_ScannerContrast <- ggplot(PE, aes(x = CT.Type, y = Contrast.Given, fill = CT.Type)) +
+box_ScannerContrast <- ggplot(PE, aes(x = CT.Type2, y = Contrast.Given, fill = CT.Type)) +
                 geom_boxplot() +
                 scale_fill_manual(values = c("lightblue", "dodgerblue" ,"mediumblue" ,"navyblue")) +
                 ylab("Contrast (mL)") + 
